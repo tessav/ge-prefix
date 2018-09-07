@@ -1,0 +1,16 @@
+
+{
+  "development": {
+    "clientId": "app_client_id",
+    "uaaURL": "https://14c0d27c-bcdf-4432-be2c-a096d3bb9477.predix-uaa.run.aws-usw02-pr.ice.predix.io",
+    "appURL": "http://localhost:5000",
+    "note": "Out of the box, the predix-webapp-starter app uses mock data, so these values are not required.  Set these values for connecting to real Predix services.",
+    "base64ClientCredential": "YXBwX2NsaWVudF9pZDpwcmVmaXh3b3Jr",
+    "loginBase64ClientCredential": "YXBwX2NsaWVudF9pZDpwcmVmaXh3b3Jr",
+    "websocketServerURL": "/livestream",
+    "rmdDatasourceURL": "{URL of your RMD datasource microservice}",
+    "rmdDocsURL": "https://raw.githubusercontent.com/PredixDev/predix-rmd-ref-app/master/README.md",
+    "dataExchangeURL": "{URL of your data exchange microservice}",
+    "timeSeriesOnly": "false"
+  }
+}

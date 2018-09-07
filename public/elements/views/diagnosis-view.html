@@ -1,0 +1,108 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/px-card/px-card.html">
+<link rel="import" href="../../bower_components/px-tile/px-tile.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/px-inbox/px-inbox.html"/>
+<link rel="import" href="../../bower_components/px-key-value-pair/px-key-value-pair.html" />
+<!-- import page level css -->
+<link rel="import" href="../seed-app/seed-app-styles.html">
+
+<dom-module id="diagnosis-view">
+  <template>
+    <style include="seed-app-styles"></style>
+    <style>
+      div.markdown-html > h1 {
+        font-weight: normal;
+        font-size: 2.6667rem;
+        color: rgb(9, 129, 156);
+      }
+      div.markdown-html > h2 {
+        margin-top: 0;
+        font-size: 1.86667rem;
+        font-weight: normal;
+      }
+      px-card {
+        background: white;
+        color: rgb(44, 64, 76);
+        --px-card-header-color: black;
+      }
+    </style>
+
+    <px-inbox id='inboxlist' selectedItem>
+      <div class="heading--page u-p">Title</div>
+      <div class="flex flex--wrap flex--justify u-p">
+        <span class="u-1/3-desk-and-up u-pr++ u-mb-" id="symptom">Symptom</span>
+        <div class="u-1/3-desk-and-up u-pr++ u-mb-">
+          <px-key-value-pair class="u-mv" key="Service Request ID" value="sr_id" id="sr_id" size="delta"></px-key-value-pair>
+          <px-key-value-pair class="u-mv" key="Alert Source" value="alertSource" size="delta"></px-key-value-pair>
+        </div>
+        <div class="u-1/3-desk-and-up u-pr++ u-mb-">
+          <px-key-value-pair class="u-mv" key="Received Date/Time" value="receivedDateTime" id="timestamp" size="delta"></px-key-value-pair>
+          <px-key-value-pair class="u-mv" key="Model" value="Optima 660" size="delta"></px-key-value-pair>
+        </div>
+      </div>
+      <div class="u-p">
+        <span class="heading--subsection">DIAGNOSIS</span>
+        <div class="flex flex--row flex--wrap flex--justify">
+          <px-key-value-pair class="u-mv" key="Issue Status" id="req_status"></px-key-value-pair>
+          <px-key-value-pair class="u-mv" key="Predicted Resolution Code" id="predicted_rescodes"></px-key-value-pair>
+          <px-key-value-pair class="u-mv" key="Actual Resolution Code" id="final_rescode"></px-key-value-pair>
+        </div>
+      </div>
+    </px-inbox>
+    <iron-ajax id="aboutContentAjaxEl"
+  handle-as="json"
+  content-type="application/json">
+  </iron-ajax>
+    <iron-ajax id="aboutContentAjaxEl"
+  handle-as="json"
+  content-type="application/json">
+  </iron-ajax>
+  </template>
+  <script>
+    Polymer({
+      is: 'diagnosis-view',
+      properties: {
+      },
+      ready: function() {
+        var that = this;
+        this.$.aboutContentAjaxEl.url = "/issues";
+
+        this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
+          response = evt.detail.response;
+          document.getElementById('sr_id').value = response[0]['sr_id'];
+          document.getElementById('symptom').innerHTML = response[0]['symptom'];
+          document.getElementById('timestamp').value = response[0]['req_timestamp'];
+          document.getElementById('final_rescode').value = response[0]['final_rescode'];
+          document.getElementById('predicted_rescodes').value = response[0]['predicted_rescodes'];
+          document.getElementById('req_status').value = response[0]['req_status'];
+          var demo = document.getElementById('inboxlist');
+          demo.listItems = response.map((item) => {
+              return {
+                "id":item['sr_id'],
+                "title":item['sr_id'],
+                "subtitle":item['symptom'],
+                "severity":"important",
+                "date":item['req_timestamp'],
+                // "alertId":"749581",
+                // "alertSource":"Combustion",
+                // "receivedDateTime":"2016-10-05T08:00",
+                // "caseNumber":"127587937",
+                // "customer":"Dorothy Vaughan",
+                // "serialNumber":"GT769375",
+                // "dlnType":"DLN 2.6",
+                // "model":"7FA+e"
+              };
+          });
+          console.log(demo);
+          demo.addEventListener('selected-item-changed', (thing) => {console.log(thing)})
+
+          // that.$.aboutContentMarkdown.markdown = "Predicting resolution...";
+        });
+        this.$.aboutContentAjaxEl.generateRequest();
+
+      },
+    });
+  </script>
+</dom-module>
