@@ -1,6 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
-<link rel="import" href="../../bower_components/px-tile/px-tile.html">
+<link rel="import" href="../../bower_components/px-data-table/px-data-table.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
 <link rel="import" href="../../bower_components/px-inbox/px-inbox.html"/>
@@ -29,33 +29,72 @@
       }
     </style>
 
-    <px-inbox id='inboxlist' selectedItem>
-      <div class="heading--page u-p">Title</div>
-      <div class="flex flex--wrap flex--justify u-p">
-        <span class="u-1/3-desk-and-up u-pr++ u-mb-" id="symptom">Symptom</span>
-        <div class="u-1/3-desk-and-up u-pr++ u-mb-">
-          <px-key-value-pair class="u-mv" key="Service Request ID" value="sr_id" id="sr_id" size="delta"></px-key-value-pair>
-          <px-key-value-pair class="u-mv" key="Alert Source" value="alertSource" size="delta"></px-key-value-pair>
+    <px-inbox id='inboxlist'>
+      <div class="heading--page u-p">Service Incident: <span id="sr_id"></span></div>
+      <div class="u-p">
+        <span class="heading--subsection">INCIDENT INFORMATION</span>
+      </div>
+      <div class="flex flex--wrap u-p">
+
+        <div class="u-1/4-desk-and-up u-pr++ u-mb-">
+          <px-key-value-pair class="u-mv" key="Status" value="" size="delta">
+          </px-key-value-pair>
+          <div style=" background-color: #fec617; margin-top: 10px; padding: 2px 10px;"><span id="req_status" style="font-size: 17px;"></span></div>
+          <px-key-value-pair class="u-mv" key="Received Date/Time" value="" id="timestamp" size="delta"></px-key-value-pair>
         </div>
-        <div class="u-1/3-desk-and-up u-pr++ u-mb-">
-          <px-key-value-pair class="u-mv" key="Received Date/Time" value="receivedDateTime" id="timestamp" size="delta"></px-key-value-pair>
+
+        <div class="u-1/4-desk-and-up u-pr++ u-mb-">
           <px-key-value-pair class="u-mv" key="Model" value="Optima 660" size="delta"></px-key-value-pair>
+          <px-key-value-pair class="u-mv" key="Error Code Count" value="5" size="delta"></px-key-value-pair>
         </div>
+
+          <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+            <px-key-value-pair class="u-mv" key="Customer Symptom" value="" size="delta">
+            </px-key-value-pair>
+            <div style="margin-top: 10px;"><span id="symptom" style="font-size: 17px;"></span></div>
+          </div>
       </div>
       <div class="u-p">
-        <span class="heading--subsection">DIAGNOSIS</span>
-        <div class="flex flex--row flex--wrap flex--justify">
-          <px-key-value-pair class="u-mv" key="Issue Status" id="req_status"></px-key-value-pair>
-          <px-key-value-pair class="u-mv" key="Predicted Resolution Code" id="predicted_rescodes"></px-key-value-pair>
-          <px-key-value-pair class="u-mv" key="Actual Resolution Code" id="final_rescode"></px-key-value-pair>
-        </div>
+        <span class="heading--subsection">MACHINE ERROR CODES</span>
+
       </div>
+      <div class="flex flex--wrap u-p">
+
+        <div class="u-1/2-desk-and-up u-pr++ u-mb-" style="padding-top: 10px">
+          <px-data-table id='errorcodetable'></px-data-table>
+        </div>
+
+          <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+            <px-vis-pie-chart
+prevent-resize
+width="450"
+height="450"
+chart-horizontal-alignment="center"
+chart-vertical-alignment="center"
+margin='{"top":"10","bottom":"10","left":"0","right":"0"}'
+register-config='{"type":"vertical","width":200}'
+chart-data="[[chartData]]"
+series-config='{"mySerie":{"xAxisUnit":"pints","y":"y","x":"x"}}'
+inner-radius="0"
+title="Total"
+title-spacing="5"
+decimal-percentage="0"
+max-registers="0"
+dynamic-menu-config='[{"name":"Log message","action":"function(data) {console.log(\"logging message\")}","eventName":"delete","icon":"px-vis:trash-series"}]'>
+</px-vis-pie-chart>
+          </div>
+      </div>
+
+      <!-- <px-data-grid id="errorcodetable"
+      columns='[{"name":"sr_id","path":"sr_id","renderer":"px-data-grid-string-renderer","id":"123"}]'
+      >
+      </px-data-grid> -->
     </px-inbox>
     <iron-ajax id="aboutContentAjaxEl"
   handle-as="json"
   content-type="application/json">
   </iron-ajax>
-    <iron-ajax id="aboutContentAjaxEl"
+    <iron-ajax id="errorLogCall"
   handle-as="json"
   content-type="application/json">
   </iron-ajax>
@@ -71,20 +110,21 @@
 
         this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
           response = evt.detail.response;
-          document.getElementById('sr_id').value = response[0]['sr_id'];
-          document.getElementById('symptom').innerHTML = response[0]['symptom'];
-          document.getElementById('timestamp').value = response[0]['req_timestamp'];
-          document.getElementById('final_rescode').value = response[0]['final_rescode'];
-          document.getElementById('predicted_rescodes').value = response[0]['predicted_rescodes'];
-          document.getElementById('req_status').value = response[0]['req_status'];
           var demo = document.getElementById('inboxlist');
-          demo.listItems = response.map((item) => {
+          demo.listItems = response.map((item, _) => {
               return {
+                "num": _,
                 "id":item['sr_id'],
                 "title":item['sr_id'],
                 "subtitle":item['symptom'],
                 "severity":"important",
                 "date":item['req_timestamp'],
+                "sr_id": item['sr_id'],
+                "symptom": item['symptom'],
+                "req_timestamp": item['req_timestamp'].slice(0, 16),
+                "final_rescode": item['final_rescode'],
+                "predicted_rescodes": item['predicted_rescodes'],
+                "req_status": item['req_status']
                 // "alertId":"749581",
                 // "alertSource":"Combustion",
                 // "receivedDateTime":"2016-10-05T08:00",
@@ -95,14 +135,34 @@
                 // "model":"7FA+e"
               };
           });
-          console.log(demo);
-          demo.addEventListener('selected-item-changed', (thing) => {console.log(thing)})
+          demo.addEventListener('selected-item-ref-changed', (selectedItem) => {
+            selected = selectedItem.detail.value;
+            document.getElementById('sr_id').innerHTML = selected['sr_id'];
+            document.getElementById('symptom').innerHTML = selected['symptom'];
+            document.getElementById('timestamp').value = selected['req_timestamp'];
+            //document.getElementById('final_rescode').value = selected['final_rescode'];
+            //document.getElementById('predicted_rescodes').value = selected['predicted_rescodes'];
+            document.getElementById('req_status').innerHTML = selected['req_status'];
+            document.getElementById('errorLogCall').url = `/errorlogs?sr_id=${selected['sr_id']}`;
+            document.getElementById('errorLogCall').addEventListener('response', function(evt) {
+              console.log(evt.detail.response);
+              document.getElementById('errorcodetable').tableData = evt.detail.response.map((item, _) => {
+                return {
+                  'id': _+1,
+                  'timestamp': item.error_timestamp,
+                  'error code': item.error_code
+                };
+              });
+            });
+            document.getElementById('errorLogCall').generateRequest();
+          })
 
           // that.$.aboutContentMarkdown.markdown = "Predicting resolution...";
         });
         this.$.aboutContentAjaxEl.generateRequest();
 
       },
+
     });
   </script>
 </dom-module>

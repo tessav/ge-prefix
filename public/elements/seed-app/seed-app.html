@@ -40,7 +40,7 @@
         nav-route="{{navRoute}}">
       </px-app-route>
 
-      <div class="flex flex--row flex--justify" style="background-color: #e2e8ed">
+      <div class="flex flex--row flex--justify" style="background-color: #e2e8ed; box-shadow: 0 2px 4px rgba(0,0,0,.2); border-bottom: 2px solid lightgrey;">
         <div class="u-3/4-desk u-1/1-palm">
           <px-app-nav
             items="{{navItems}}"
@@ -99,12 +99,17 @@
               //   "icon": "px-com:message"
               // },
               {
+                "label": "Dashboard",
+                "id": "dashboard",
+                "icon": "px-fea:dashboard"
+              },
+              {
                 "label": "Datasource",
                 "id": "datasource",
                 "icon": "px-fea:data-sources"
               },
               {
-                "label": "Issues",
+                "label": "Incidents",
                 "id": "diagnosis",
                 "icon": "px-fea:alerts"
               },

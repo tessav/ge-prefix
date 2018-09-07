@@ -224,7 +224,7 @@ app.post('/runmodel', async function(req, res) {
   })
   await client.connect()
   const pgres = await client.query(
-    `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTION IN PROGRESS', '7/31/2015 21:25');`)
+    `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '7/31/2015 21:25');`)
   console.log(pgres)
   await client.end()
   res.send('ran model');
@@ -244,6 +244,25 @@ app.get('/issues', async function(req, res) {
   console.log(pgres.rows)
   res.send(pgres.rows);
 })
+
+app.get('/errorlogs', async function(req, res) {
+  var sr_id = req.query.sr_id
+  console.log(req.query)
+  const client = new Client({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'postgres',
+    password: '',
+    port: 5432,
+  })
+  await client.connect()
+  const errors = await client.query(`SELECT * FROM ERROR_LOG WHERE sr_id='${sr_id}';`)
+  await client.end()
+  console.log(errors.rows)
+  res.send(errors.rows)
+
+})
+
 
 // Sample route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
