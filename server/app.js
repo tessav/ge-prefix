@@ -239,7 +239,7 @@ app.get('/issues', async function(req, res) {
     port: 5432,
   })
   await client.connect()
-  const pgres = await client.query('SELECT * FROM SERVICE_REQUEST;')
+  const pgres = await client.query('SELECT * FROM SERVICE_REQUEST LIMIT 20;')
   await client.end()
   console.log(pgres.rows)
   res.send(pgres.rows);
@@ -256,7 +256,7 @@ app.get('/errorlogs', async function(req, res) {
     port: 5432,
   })
   await client.connect()
-  const errors = await client.query(`SELECT * FROM ERROR_LOG WHERE sr_id='${sr_id}';`)
+  const errors = await client.query(`SELECT * FROM ERROR_LOG WHERE sr_id='${sr_id}' LIMIT 20;`)
   await client.end()
   console.log(errors.rows)
   res.send(errors.rows)

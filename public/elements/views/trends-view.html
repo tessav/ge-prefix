@@ -1,48 +1,234 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
+<link rel="import" href="../../bower_components/px-data-table/px-data-table.html">
+<link rel="import" href="../../bower_components/px-rangepicker/px-rangepicker.html">
+<link rel="import" href="../../bower_components/px-gauge/px-gauge.html">
+<link rel="import" href="../../bower_components/px-kpi/px-kpi.html">
+<link rel="import" href="../../bower_components/px-key-value-pair/px-key-value-pair.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/px-vis-pie-chart/px-vis-pie-chart.html"/>
+<link rel="import" href="../../bower_components/px-typeahead/px-typeahead.html"/>
+<link rel="import" href="../../bower_components/px-heatmap-grid/px-heatmap-grid.html"/>
+<link rel="import" href="../../bower_components/px-dropdown/px-dropdown.html"/>
+<!-- import page level css -->
+<link rel="import" href="../seed-app/seed-app-styles.html">
 
 <dom-module id="trends-view">
   <template>
+    <style include="seed-app-styles"></style>
     <style>
-      div.markdown-html > h1 {
-        font-weight: normal;
-        font-size: 2.6667rem;
-        color: rgb(9, 129, 156);
-      }
-      div.markdown-html > h2 {
-        margin-top: 0;
-        font-size: 1.86667rem;
-        font-weight: normal;
-      }
-      px-card {
-        background: white;
-        color: rgb(44, 64, 76);
-        --px-card-header-color: black;
-      }
+    div.markdown-html > h1 {
+      font-weight: normal;
+      font-size: 2.6667rem;
+      color: rgb(9, 129, 156);
+    }
+    div.markdown-html > h2 {
+      margin-top: 0;
+      font-size: 1.86667rem;
+      font-weight: normal;
+    }
+    /* px-card {
+    background: white;
+    color: rgb(44, 64, 76);
+    --px-card-header-color: black;
+    } */
     </style>
-    <px-card id="myCard" header-text="TRENDS">
-      <div>
-        <marked-element id="aboutContentMarkdown" markdown="">
-          <div class="markdown-html"></div>
-        </marked-element>      </div>
-    </px-card>
-    <iron-ajax id="aboutContentAjaxEl" handle-as="text"></iron-ajax>
-  </template>
-  <script>
-    Polymer({
-      is: 'trends-view',
-      properties: {},
-      ready: function() {
-        var that = this;
-        this.$.aboutContentAjaxEl.url = "/trends";
+    <px-card id="myCard" style="height: 70px;">
 
-        this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
-          that.$.aboutContentMarkdown.markdown = evt.detail.response;
-        });
-        this.$.aboutContentAjaxEl.generateRequest();
+      <div class="flex flex--wrap u-p">
+
+        <div class="u-1/4-desk-and-up u-pr++ u-mb-">
+          <div style="padding-top: 5px; font-size: 19px;">RESOLUTION ANALYSIS</div>
+        </div>
+
+        <div class="u-1/4-desk-and-up u-pr++ u-mb-">
+          <!-- <px-typeahead
+          placeholder="Select resolution code"
+          required
+          max-suggestions="10"
+          local-candidates='["Alabama","Alaska","American Samoa","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District Of Columbia","Federated States Of Micronesia","Florida","Georgia","Guam","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Marshall Islands","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Northern Mariana Islands","Ohio","Oklahoma","Oregon","Palau","Pennsylvania","Puerto Rico","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virgin Islands","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]'
+          prefetch-url="https://www.predix-ui.com/px-typeahead/px-typeahead/countries.json">
+        </px-typeahead> -->
+        <px-dropdown
+        style="margin-top: 5px;"
+items='[{"key":"1","val":"iPhone"},{"key":"2","val":"Android"},{"key":"3","val":"Blackberry"},{"key":"4","val":"Windows Phone"},{"key":"5","val":"Flip Phone","disabled":true}]'
+sort-mode="key"
+button-style="tertiary"
+display-value="Select Resolution Code"
+search-mode
+trigger-height="30">
+</px-dropdown>
+      </div>
+
+    </div>
+  </px-card>
+
+  <br />
+
+  <div class="flex flex--justify flex--wrap u-p" style="margin: 5px 20px;">
+
+    <div class="u-1/4-desk-and-up u-pr++ u-mb-">
+      <px-key-value-pair
+      label="LAST RESOLUTION"
+      value="12-03-2017"
+      uom=""
+      size="gamma">
+    </px-key-value-pair>
+  </div>
+
+  <div class="u-1/4-desk-and-up u-pr++ u-mb-">
+    <px-key-value-pair
+    label="AVERAGE FREQUENCY"
+    value="123"
+    uom="days"
+    size="gamma"></px-key-value-pair>
+  </div>
+
+  <div class="u-1/4-desk-and-up u-pr++ u-mb-">
+    <px-key-value-pair
+    label="TOP TOPIC"
+    value="GANTRY"
+    uom=""
+    size="gamma">
+  </px-key-value-pair>
+</div>
+
+<div class="u-1/4-desk-and-up u-pr++ u-mb-">
+  <px-key-value-pair
+  label="TOP ERROR CODE"
+  value="123456"
+  uom=""
+  size="gamma"></px-key-value-pair>
+</div>
+
+</div>
+
+<div class="flex flex--wrap u-p">
+
+  <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">ASSOCIATED ERROR CODES</span>
+    </div>
+    <div style="padding: 20px;">
+      <px-data-table id='errorcodetable' page-size="5"></px-data-table>
+    </div>
+  </div>
+
+  <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">ERROR CODE BREAKDOWN</span>
+    </div>
+    <div style="width: 600px; margin-top: 20px;">
+    <px-vis-pie-chart
+    id='errorpiechart'
+    width="300"
+    height="300"
+    chart-horizontal-alignment="right"
+    chart-vertical-alignment="center"
+    margin='{"top":"10","bottom":"10","left":"30","right":"10"}'
+    inner-radius="0"
+    use-percentage
+    decimal-percentage="0"
+    max-registers="0"
+    series-config='{"mySerie":{"xAxisUnit":"code(s)","y":"y","x":"x"}}'
+    ></px-vis-pie-chart>
+  </div>
+  </div>
+
+  <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">ASSOCIATED SYMPTOM WORD CLOUD</span>
+    </div>
+  </div>
+
+  <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">ASSOCIATED SYMPTOM WORD CLOUD</span>
+    </div>
+  </div>
+
+  <div class="u-2/3-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">RESOLUTION CODE HEATMAP</span>
+    </div>
+    <div style="padding: 10px 60px; align: center">
+    <px-heatmap-grid
+    id='heatmap'
+    scale-min="0"
+    scale-max="100"
+    >
+    </px-heatmap-grid>
+    </div>
+  </div>
+
+  <div class="u-1/3-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">RELATED RESOLUTION CODES</span>
+    </div>
+    <div style="padding: 10px;">
+      <div style="padding: 10px 10px;">
+
+        <table class="table">
+          <tbody>
+            <tr>
+              <th>Rank</th>
+              <th>Resolution Code</th>
+              <th>Similarity</th>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>No_Structural_Problem_Found</td>
+              <td>60%</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>No_Structural_Problem_Found</td>
+              <td>60%</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>No_Structural_Problem_Found</td>
+              <td>60%</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<iron-ajax id="aboutContentAjaxEl" handle-as="text"></iron-ajax>
+</template>
+<script>
+Polymer({
+  is: 'trends-view',
+  properties: {},
+  ready: function() {
+    var that = this;
+    this.$.aboutContentAjaxEl.url = "/issues";
+
+    this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
+      let heatmapArr = [];
+      const monthMapping = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      for (let i=0; i<8; i++) {
+        for (let j=0; j<12; j++) {
+          heatmapArr.push({
+            "row": 'Year 201' + (i+1),
+            "col": monthMapping[j],
+            "value": i * j,
+          });
+        }
       }
+      console.log(heatmapArr);
+      document.getElementById('heatmap').heatmapData = heatmapArr;
     });
-  </script>
+
+    this.$.aboutContentAjaxEl.generateRequest();
+
+  }
+});
+</script>
 </dom-module>
