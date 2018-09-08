@@ -4,6 +4,9 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
 <link rel="import" href="../../bower_components/px-inbox/px-inbox.html"/>
+<link rel="import" href="../../bower_components/px-typeahead/px-typeahead.html"/>
+<link rel="import" href="../../bower_components/px-vis-pie-chart/px-vis-pie-chart.html"/>
+<link rel="import" href="../../bower_components/px-simple-horizontal-bar-chart/px-simple-horizontal-bar-chart.html"/>
 <link rel="import" href="../../bower_components/px-key-value-pair/px-key-value-pair.html" />
 <!-- import page level css -->
 <link rel="import" href="../seed-app/seed-app-styles.html">
@@ -12,21 +15,21 @@
   <template>
     <style include="seed-app-styles"></style>
     <style>
-      div.markdown-html > h1 {
-        font-weight: normal;
-        font-size: 2.6667rem;
-        color: rgb(9, 129, 156);
-      }
-      div.markdown-html > h2 {
-        margin-top: 0;
-        font-size: 1.86667rem;
-        font-weight: normal;
-      }
-      px-card {
-        background: white;
-        color: rgb(44, 64, 76);
-        --px-card-header-color: black;
-      }
+    div.markdown-html > h1 {
+      font-weight: normal;
+      font-size: 2.6667rem;
+      color: rgb(9, 129, 156);
+    }
+    div.markdown-html > h2 {
+      margin-top: 0;
+      font-size: 1.86667rem;
+      font-weight: normal;
+    }
+    px-card {
+      background: white;
+      color: rgb(44, 64, 76);
+      --px-card-header-color: black;
+    }
     </style>
 
     <px-inbox id='inboxlist'>
@@ -40,19 +43,21 @@
           <px-key-value-pair class="u-mv" key="Status" value="" size="delta">
           </px-key-value-pair>
           <div style=" background-color: #fec617; margin-top: 10px; padding: 2px 10px;"><span id="req_status" style="font-size: 17px;"></span></div>
+          <br />
           <px-key-value-pair class="u-mv" key="Received Date/Time" value="" id="timestamp" size="delta"></px-key-value-pair>
         </div>
 
         <div class="u-1/4-desk-and-up u-pr++ u-mb-">
           <px-key-value-pair class="u-mv" key="Model" value="Optima 660" size="delta"></px-key-value-pair>
+          <br />
           <px-key-value-pair class="u-mv" key="Error Code Count" value="5" size="delta"></px-key-value-pair>
         </div>
 
-          <div class="u-1/2-desk-and-up u-pr++ u-mb-">
-            <px-key-value-pair class="u-mv" key="Customer Symptom" value="" size="delta">
-            </px-key-value-pair>
-            <div style="margin-top: 10px;"><span id="symptom" style="font-size: 17px;"></span></div>
-          </div>
+        <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+          <px-key-value-pair class="u-mv" key="Customer Symptom" value="" size="delta">
+          </px-key-value-pair>
+          <div style="margin-top: 10px;"><span id="symptom" style="font-size: 17px;"></span></div>
+        </div>
       </div>
       <div class="u-p">
         <span class="heading--subsection">MACHINE ERROR CODES</span>
@@ -61,108 +66,187 @@
       <div class="flex flex--wrap u-p">
 
         <div class="u-1/2-desk-and-up u-pr++ u-mb-" style="padding-top: 10px">
-          <px-data-table id='errorcodetable'></px-data-table>
+          <px-data-table id='errorcodetable' page-size="5"></px-data-table>
         </div>
 
-          <div class="u-1/2-desk-and-up u-pr++ u-mb-">
-            <px-vis-pie-chart
-prevent-resize
-width="450"
-height="450"
-chart-horizontal-alignment="center"
-chart-vertical-alignment="center"
-margin='{"top":"10","bottom":"10","left":"0","right":"0"}'
-register-config='{"type":"vertical","width":200}'
-chart-data="[[chartData]]"
-series-config='{"mySerie":{"xAxisUnit":"pints","y":"y","x":"x"}}'
-inner-radius="0"
-title="Total"
-title-spacing="5"
-decimal-percentage="0"
-max-registers="0"
-dynamic-menu-config='[{"name":"Log message","action":"function(data) {console.log(\"logging message\")}","eventName":"delete","icon":"px-vis:trash-series"}]'>
-</px-vis-pie-chart>
-          </div>
+        <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+          <px-vis-pie-chart
+          id='errorpiechart'
+          width="450"
+          height="450"
+          chart-horizontal-alignment="right"
+          chart-vertical-alignment="center"
+          margin='{"top":"10","bottom":"10","left":"30","right":"10"}'
+          inner-radius="0"
+          title="Error Codes Breakdown"
+          title-spacing="5"
+          use-percentage
+          decimal-percentage="0"
+          max-registers="0"
+          series-config='{"mySerie":{"xAxisUnit":"code(s)","y":"y","x":"x"}}'
+          >
+        </px-vis-pie-chart>
+      </div>
+    </div>
+
+    <div class="flex flex--wrap u-p">
+
+      <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+        <div class="u-p">
+          <span class="heading--subsection">PREDICTED RESOLUTION CODES</span>
+        </div>
+        <div style="padding: 10px 20px;">
+
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Rank</th>
+                <th>Resolution Code</th>
+                <th>Confidence</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>No_Structural_Problem_Found</td>
+                <td>60%</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>No_Structural_Problem_Found</td>
+                <td>60%</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>No_Structural_Problem_Found</td>
+                <td>60%</td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- <px-data-grid id="errorcodetable"
-      columns='[{"name":"sr_id","path":"sr_id","renderer":"px-data-grid-string-renderer","id":"123"}]'
-      >
-      </px-data-grid> -->
-    </px-inbox>
-    <iron-ajax id="aboutContentAjaxEl"
-  handle-as="json"
-  content-type="application/json">
-  </iron-ajax>
-    <iron-ajax id="errorLogCall"
-  handle-as="json"
-  content-type="application/json">
-  </iron-ajax>
-  </template>
-  <script>
-    Polymer({
-      is: 'diagnosis-view',
-      properties: {
-      },
-      ready: function() {
-        var that = this;
-        this.$.aboutContentAjaxEl.url = "/issues";
+      <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+        <div class="u-p">
+          <span class="heading--subsection">ACTUAL RESOLUTION CODE</span>
+        </div>
+        <div style="padding: 20px 20px">
+          <px-typeahead
+          placeholder="Enter actual resolution code"
+          max-suggestions="10"
+          local-candidates='["Alabama","Alaska","American Samoa","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District Of Columbia","Federated States Of Micronesia","Florida","Georgia","Guam","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Marshall Islands","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Northern Mariana Islands","Ohio","Oklahoma","Oregon","Palau","Pennsylvania","Puerto Rico","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virgin Islands","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]'
+          prefetch-url="https://www.predix-ui.com/px-typeahead/px-typeahead/countries.json">
+        </px-typeahead>
+        <br />
+        <button class="btn btn--call-to-action">
+          <px-icon style="--iron-icon-height:16px;margin-right:5px;" icon="px-utl:confirmed"></px-icon>Resolve
+        </button>
+      </div>
+    </div>
+  </div>
+  <br /><br /><br /><br />
 
-        this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
-          response = evt.detail.response;
-          var demo = document.getElementById('inboxlist');
-          demo.listItems = response.map((item, _) => {
-              return {
-                "num": _,
-                "id":item['sr_id'],
-                "title":item['sr_id'],
-                "subtitle":item['symptom'],
-                "severity":"important",
-                "date":item['req_timestamp'],
-                "sr_id": item['sr_id'],
-                "symptom": item['symptom'],
-                "req_timestamp": item['req_timestamp'].slice(0, 16),
-                "final_rescode": item['final_rescode'],
-                "predicted_rescodes": item['predicted_rescodes'],
-                "req_status": item['req_status']
-                // "alertId":"749581",
-                // "alertSource":"Combustion",
-                // "receivedDateTime":"2016-10-05T08:00",
-                // "caseNumber":"127587937",
-                // "customer":"Dorothy Vaughan",
-                // "serialNumber":"GT769375",
-                // "dlnType":"DLN 2.6",
-                // "model":"7FA+e"
-              };
+</px-inbox>
+<iron-ajax id="aboutContentAjaxEl"
+handle-as="json"
+content-type="application/json">
+</iron-ajax>
+<iron-ajax id="errorLogCall"
+handle-as="json"
+content-type="application/json">
+</iron-ajax>
+</template>
+<script>
+Polymer({
+  is: 'diagnosis-view',
+  properties: {
+  },
+  ready: function() {
+    var that = this;
+    this.$.aboutContentAjaxEl.url = "/issues";
+
+    this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
+      response = evt.detail.response;
+      var demo = document.getElementById('inboxlist');
+      demo.listItems = response.map((item, _) => {
+        return {
+          "num": _,
+          "id":item['sr_id'],
+          "title":item['sr_id'],
+          "subtitle":item['symptom'],
+          "severity":"important",
+          "date":item['req_timestamp'],
+          "sr_id": item['sr_id'],
+          "symptom": item['symptom'],
+          "req_timestamp": item['req_timestamp'].slice(0, 16),
+          "final_rescode": item['final_rescode'],
+          "predicted_rescodes": item['predicted_rescodes'],
+          "req_status": item['req_status']
+          // "alertId":"749581",
+          // "alertSource":"Combustion",
+          // "receivedDateTime":"2016-10-05T08:00",
+          // "caseNumber":"127587937",
+          // "customer":"Dorothy Vaughan",
+          // "serialNumber":"GT769375",
+          // "dlnType":"DLN 2.6",
+          // "model":"7FA+e"
+        };
+      });
+      demo.addEventListener('selected-item-ref-changed', (selectedItem) => {
+        selected = selectedItem.detail.value;
+        document.getElementById('sr_id').innerHTML = selected['sr_id'];
+        document.getElementById('symptom').innerHTML = selected['symptom'];
+        document.getElementById('timestamp').value = selected['req_timestamp'];
+        //document.getElementById('final_rescode').value = selected['final_rescode'];
+        //document.getElementById('predicted_rescodes').value = selected['predicted_rescodes'];
+        document.getElementById('req_status').innerHTML = selected['req_status'];
+        document.getElementById('errorLogCall').url = `/errorlogs?sr_id=${selected['sr_id']}`;
+        document.getElementById('errorLogCall').addEventListener('response', function(evt) {
+          console.log(evt.detail.response);
+          document.getElementById('errorcodetable').tableData = evt.detail.response.map((item, _) => {
+            return {
+              'id': _+1,
+              'timestamp': item.error_timestamp,
+              'error code': item.error_code
+            };
           });
-          demo.addEventListener('selected-item-ref-changed', (selectedItem) => {
-            selected = selectedItem.detail.value;
-            document.getElementById('sr_id').innerHTML = selected['sr_id'];
-            document.getElementById('symptom').innerHTML = selected['symptom'];
-            document.getElementById('timestamp').value = selected['req_timestamp'];
-            //document.getElementById('final_rescode').value = selected['final_rescode'];
-            //document.getElementById('predicted_rescodes').value = selected['predicted_rescodes'];
-            document.getElementById('req_status').innerHTML = selected['req_status'];
-            document.getElementById('errorLogCall').url = `/errorlogs?sr_id=${selected['sr_id']}`;
-            document.getElementById('errorLogCall').addEventListener('response', function(evt) {
-              console.log(evt.detail.response);
-              document.getElementById('errorcodetable').tableData = evt.detail.response.map((item, _) => {
-                return {
-                  'id': _+1,
-                  'timestamp': item.error_timestamp,
-                  'error code': item.error_code
-                };
-              });
-            });
-            document.getElementById('errorLogCall').generateRequest();
-          })
 
-          // that.$.aboutContentMarkdown.markdown = "Predicting resolution...";
+          let totalCodes = evt.detail.response.length;
+          let codeDict = {};
+          for (let i=0; i<totalCodes; i++) {
+            error_code = String(evt.detail.response[i].error_code)
+            if (!(error_code in codeDict)) {
+              codeDict[error_code] = 0;
+            }
+            codeDict[error_code]++;
+          }
+          console.log(codeDict);
+          console.log(Object.keys(codeDict).map((key) => {
+            return {
+              "y": key,
+              "x": codeDict[key],
+              "percentage": codeDict[key] / totalCodes * 100,
+            }
+          }));
+          document.getElementById('errorpiechart').chartData = Object.keys(codeDict).map((key) => {
+            return {
+              "y": key,
+              "x": codeDict[key],
+              "percentage": codeDict[key] / totalCodes * 100,
+            }
+          });
         });
-        this.$.aboutContentAjaxEl.generateRequest();
+        document.getElementById('errorLogCall').generateRequest();
+      })
 
-      },
-
+      // that.$.aboutContentMarkdown.markdown = "Predicting resolution...";
     });
-  </script>
+    this.$.aboutContentAjaxEl.generateRequest();
+
+  },
+  _resolve: function() {
+
+  }
+
+});
+</script>
 </dom-module>

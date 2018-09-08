@@ -48,7 +48,10 @@
     "px-headings-design": "^1.0.3",
     "px-meta-lists-design": "^1.0.1",
     "px-forms-design": "^2.0.6",
-    "px-inbox": "^2.3.5"
+    "px-inbox": "^2.3.5",
+    "px-vis-pie-chart": "^3.0.0",
+    "px-simple-horizontal-bar-chart": "^1.1.1",
+    "px-typeahead": "^2.3.2"
   },
   "resolutions": {
     "px-app-helpers": "^2.0.0",
