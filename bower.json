@@ -23,7 +23,7 @@
     "px-data-table": "^4.0.0",
     "es6-promise": "~3.3.1",
     "moment": "^2.17.1",
-    "px-rangepicker": "^2.0.0",
+    "px-rangepicker": "^3.5.2",
     "px-dropdown": "^4.0.0",
     "px-vis-timeseries": "^3.0.0",
     "marked-element": "^1.3.1",
@@ -51,7 +51,9 @@
     "px-inbox": "^2.3.5",
     "px-vis-pie-chart": "^3.0.0",
     "px-simple-horizontal-bar-chart": "^1.1.1",
-    "px-typeahead": "^2.3.2"
+    "px-typeahead": "^2.3.2",
+    "px-kpi": "^5.0.0",
+    "px-gauge": "^2.3.0"
   },
   "resolutions": {
     "px-app-helpers": "^2.0.0",

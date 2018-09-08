@@ -6,7 +6,6 @@
 <link rel="import" href="../../bower_components/px-inbox/px-inbox.html"/>
 <link rel="import" href="../../bower_components/px-typeahead/px-typeahead.html"/>
 <link rel="import" href="../../bower_components/px-vis-pie-chart/px-vis-pie-chart.html"/>
-<link rel="import" href="../../bower_components/px-simple-horizontal-bar-chart/px-simple-horizontal-bar-chart.html"/>
 <link rel="import" href="../../bower_components/px-key-value-pair/px-key-value-pair.html" />
 <!-- import page level css -->
 <link rel="import" href="../seed-app/seed-app-styles.html">
@@ -180,10 +179,10 @@ Polymer({
           "req_timestamp": item['req_timestamp'].slice(0, 16),
           "final_rescode": item['final_rescode'],
           "predicted_rescodes": item['predicted_rescodes'],
-          "req_status": item['req_status']
+          "req_status": item['req_status'],
           // "alertId":"749581",
           // "alertSource":"Combustion",
-          // "receivedDateTime":"2016-10-05T08:00",
+          "receivedDateTime":"2016-10-05T08:00",
           // "caseNumber":"127587937",
           // "customer":"Dorothy Vaughan",
           // "serialNumber":"GT769375",
@@ -201,7 +200,6 @@ Polymer({
         document.getElementById('req_status').innerHTML = selected['req_status'];
         document.getElementById('errorLogCall').url = `/errorlogs?sr_id=${selected['sr_id']}`;
         document.getElementById('errorLogCall').addEventListener('response', function(evt) {
-          console.log(evt.detail.response);
           document.getElementById('errorcodetable').tableData = evt.detail.response.map((item, _) => {
             return {
               'id': _+1,
@@ -219,14 +217,6 @@ Polymer({
             }
             codeDict[error_code]++;
           }
-          console.log(codeDict);
-          console.log(Object.keys(codeDict).map((key) => {
-            return {
-              "y": key,
-              "x": codeDict[key],
-              "percentage": codeDict[key] / totalCodes * 100,
-            }
-          }));
           document.getElementById('errorpiechart').chartData = Object.keys(codeDict).map((key) => {
             return {
               "y": key,
