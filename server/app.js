@@ -257,36 +257,22 @@ app.get('/dashboard', async function(req, res)  {
 })
 
 app.get('/resolutions', async function(req, res)  {
-  // FIXME add datetime range filter !!!
+  // FIXME add resolution
+  const rescode = 'Perform_LFC_and_system_software_reload'
   const client = new Client(dbconfig)
   await client.connect()
-  const totalIncidents = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST;`)
-  const numResolved = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST WHERE req_status='RESOLVED';`)
-  const totalErrorCodes = await client.query(`SELECT COUNT(*) FROM ERROR_LOG;`)
-  const uniqueResCodes = await client.query(`SELECT final_rescode, COUNT(*) FROM SERVICE_REQUEST GROUP BY final_rescode;`)
+  const uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+  const lastResolution = await client.query(`SELECT to_char(MAX(req_timestamp), 'DD-MM-YYYY') as last_resolution from SERVICE_REQUEST;`)
+  const avgFrequency = await client.query(`SELECT DATE_PART('day', MAX(req_timestamp) - MIN(req_timestamp)) / COUNT(*) as freq from SERVICE_REQUEST WHERE final_rescode='${rescode}';`)
+  const errorCodes = await client.query(`SELECT el.error_code as error_code, COUNT(*) as counter FROM ERROR_LOG el, SERVICE_REQUEST sr WHERE sr.final_rescode='${rescode}' AND el.sr_id=sr.sr_id GROUP BY el.error_code ORDER BY counter DESC;`)
+  const srHeatmap = await client.query(`SELECT to_char(req_timestamp, 'YYYY') as year, to_char(req_timestamp, 'Mon') as month, COUNT(*) FROM service_request GROUP BY year, month ORDER BY year,month;`)
   await client.end()
   res.send({
-      'totalIncidents': totalIncidents.rows[0].count,
-      'numResolved': numResolved.rows[0].count,
-      'totalErrorCodes': totalErrorCodes.rows[0].count,
-      'uniqueResCodes': uniqueResCodes.rows
-  });
-})
-
-app.get('/', async function(req, res)  {
-  // FIXME add datetime range filter !!!
-  const client = new Client(dbconfig)
-  await client.connect()
-  const totalIncidents = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST;`)
-  const numResolved = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST WHERE req_status='RESOLVED';`)
-  const totalErrorCodes = await client.query(`SELECT COUNT(*) FROM ERROR_LOG;`)
-  const uniqueResCodes = await client.query(`SELECT final_rescode, COUNT(*) FROM SERVICE_REQUEST GROUP BY final_rescode;`)
-  await client.end()
-  res.send({
-      'totalIncidents': totalIncidents.rows[0].count,
-      'numResolved': numResolved.rows[0].count,
-      'totalErrorCodes': totalErrorCodes.rows[0].count,
-      'uniqueResCodes': uniqueResCodes.rows
+      'uniqueResCodes': uniqueResCodes.rows,
+      'lastResolution': lastResolution.rows[0].last_resolution,
+      'avgFrequency': avgFrequency.rows[0].freq,
+      'errorCodes': errorCodes.rows,
+      'srHeatmap': srHeatmap.rows
   });
 })
 

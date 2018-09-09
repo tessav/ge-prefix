@@ -51,11 +51,12 @@
           prefetch-url="https://www.predix-ui.com/px-typeahead/px-typeahead/countries.json">
         </px-typeahead> -->
         <px-dropdown
+        id="rescodeDropdown"
         style="margin-top: 5px;"
 items='[{"key":"1","val":"iPhone"},{"key":"2","val":"Android"},{"key":"3","val":"Blackberry"},{"key":"4","val":"Windows Phone"},{"key":"5","val":"Flip Phone","disabled":true}]'
 sort-mode="key"
 button-style="tertiary"
-display-value="Select Resolution Code"
+display-value="All Resolution Codes"
 search-mode
 trigger-height="30">
 </px-dropdown>
@@ -71,7 +72,8 @@ trigger-height="30">
     <div class="u-1/4-desk-and-up u-pr++ u-mb-">
       <px-key-value-pair
       label="LAST RESOLUTION"
-      value="12-03-2017"
+      id='lastResolution'
+      value="0"
       uom=""
       size="gamma">
     </px-key-value-pair>
@@ -80,7 +82,8 @@ trigger-height="30">
   <div class="u-1/4-desk-and-up u-pr++ u-mb-">
     <px-key-value-pair
     label="AVERAGE FREQUENCY"
-    value="123"
+    id='avgFrequency'
+    value="0"
     uom="days"
     size="gamma"></px-key-value-pair>
   </div>
@@ -88,7 +91,8 @@ trigger-height="30">
   <div class="u-1/4-desk-and-up u-pr++ u-mb-">
     <px-key-value-pair
     label="TOP TOPIC"
-    value="GANTRY"
+    id='topTopic'
+    value=""
     uom=""
     size="gamma">
   </px-key-value-pair>
@@ -97,7 +101,8 @@ trigger-height="30">
 <div class="u-1/4-desk-and-up u-pr++ u-mb-">
   <px-key-value-pair
   label="TOP ERROR CODE"
-  value="123456"
+  id='topErrorCode'
+  value=""
   uom=""
   size="gamma"></px-key-value-pair>
 </div>
@@ -120,19 +125,22 @@ trigger-height="30">
       <span class="heading--subsection">ERROR CODE BREAKDOWN</span>
     </div>
     <div style="width: 600px; margin-top: 20px;">
-    <px-vis-pie-chart
-    id='errorpiechart'
-    width="300"
-    height="300"
-    chart-horizontal-alignment="right"
-    chart-vertical-alignment="center"
-    margin='{"top":"10","bottom":"10","left":"30","right":"10"}'
-    inner-radius="0"
-    use-percentage
-    decimal-percentage="0"
-    max-registers="0"
-    series-config='{"mySerie":{"xAxisUnit":"code(s)","y":"y","x":"x"}}'
-    ></px-vis-pie-chart>
+      <px-vis-pie-chart
+      id='errorpiechart'
+      width="400"
+      height="300"
+      chart-horizontal-alignment="center"
+      chart-vertical-alignment="center"
+      margin='{"top":"10","bottom":"10","left":"30","right":"10"}'
+      inner-radius="0"
+      title="Error Codes Breakdown"
+      title-spacing="5"
+      use-percentage
+      decimal-percentage="2"
+      max-registers="0"
+      hide-register="true"
+      series-config='{"mySerie":{"xAxisUnit":"","y":"y","x":"x"}}'
+      ></px-vis-pie-chart>
   </div>
   </div>
 
@@ -150,13 +158,13 @@ trigger-height="30">
 
   <div class="u-2/3-desk-and-up u-pr++ u-mb-">
     <div class="u-p">
-      <span class="heading--subsection">RESOLUTION CODE HEATMAP</span>
+      <span class="heading--subsection">SERVICE REQUEST HEATMAP</span>
     </div>
     <div style="padding: 10px 60px; align: center">
     <px-heatmap-grid
     id='heatmap'
     scale-min="0"
-    scale-max="100"
+    scale-max="300"
     >
     </px-heatmap-grid>
     </div>
@@ -208,22 +216,49 @@ Polymer({
   properties: {},
   ready: function() {
     var that = this;
-    this.$.aboutContentAjaxEl.url = "/issues";
+    this.$.aboutContentAjaxEl.url = "/resolutions";
 
     this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
-      let heatmapArr = [];
+
+      let jsonData = JSON.parse(evt.detail.response);
+      console.log(jsonData);
+      document.getElementById('rescodeDropdown').items = jsonData.uniqueResCodes.map((item, _) => {
+        return {
+          'key': item['counter'],
+          'val': item['counter']
+        };
+      });
+
+      document.getElementById('lastResolution').value = jsonData.lastResolution;
+      document.getElementById('avgFrequency').value = jsonData.avgFrequency.toFixed(1);
+      document.getElementById('topErrorCode').value = jsonData.errorCodes ? jsonData.errorCodes[0]['error_code'] : 'NIL';
+      document.getElementById('errorcodetable').tableData = jsonData.errorCodes;
+      document.getElementById('errorpiechart').chartData = jsonData.errorCodes.map((item) => {
+        return {
+          'y': item['error_code'],
+          'x': parseInt(item['counter'])
+        };
+      });
+
+      let heatmapData = []
+      let cellMapping = {}
+      let distinctYears = {}
+      for (let cell of jsonData.srHeatmap) {
+        cellMapping[`${cell['year']}-${cell['month']}`] = cell['count'];
+        distinctYears[cell['year']] = 1;
+      }
       const monthMapping = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      for (let i=0; i<8; i++) {
-        for (let j=0; j<12; j++) {
-          heatmapArr.push({
-            "row": 'Year 201' + (i+1),
-            "col": monthMapping[j],
-            "value": i * j,
-          });
+      for (let distinctYear of Object.keys(distinctYears)) {
+        for (let month of monthMapping) {
+          heatmapData.push({
+            'row': `Year ${distinctYear}`,
+            'col': month,
+            'value': cellMapping[`${distinctYear}-${month}`] ? cellMapping[`${distinctYear}-${month}`] : 0
+          })
         }
       }
-      console.log(heatmapArr);
-      document.getElementById('heatmap').heatmapData = heatmapArr;
+
+      document.getElementById('heatmap').heatmapData = heatmapData;
     });
 
     this.$.aboutContentAjaxEl.generateRequest();
