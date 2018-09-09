@@ -44,13 +44,13 @@ if (node_env === 'development') {
 
 const { Pool, Client } = require('pg')
 
-// const client = new Client({
-//   user: 'postgres',
-//   host: 'localhost',
-//   database: 'postgres',
-//   password: '',
-//   port: 5432,
-// })
+const dbconfig = {
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: '',
+  port: 5432,
+}
 
 // Session Storage Configuration:
 // *** Use this in-memory session store for development only. Use redis for prod. **
@@ -215,13 +215,7 @@ app.get('/config', function(req, res) {
 app.post('/runmodel', async function(req, res) {
   console.log(req.body);
   console.log('running model');
-  const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: '',
-    port: 5432,
-  })
+  const client = new Client(dbconfig)
   await client.connect()
   const pgres = await client.query(
     `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '7/31/2015 21:25');`)
@@ -231,13 +225,7 @@ app.post('/runmodel', async function(req, res) {
 });
 
 app.get('/issues', async function(req, res) {
-  const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: '',
-    port: 5432,
-  })
+  const client = new Client(dbconfig)
   await client.connect()
   const pgres = await client.query('SELECT * FROM SERVICE_REQUEST LIMIT 20;')
   await client.end()
@@ -245,22 +233,71 @@ app.get('/issues', async function(req, res) {
   res.send(pgres.rows);
 })
 
+app.get('/dashboard', async function(req, res)  {
+  // FIXME add datetime range filter !!!
+  const client = new Client(dbconfig)
+  await client.connect()
+  const totalIncidents = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST;`)
+  const numResolved = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST WHERE req_status='RESOLVED';`)
+  const totalErrorCodes = await client.query(`SELECT COUNT(*) FROM ERROR_LOG;`)
+  const uniqueResCodes = await client.query(`SELECT final_rescode, COUNT(*) as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+  const incidentsAgg = await client.query(`SELECT to_char(req_timestamp, 'YYYY-MM') as monthcounter, Count(*) as counter FROM SERVICE_REQUEST GROUP BY monthcounter ORDER BY monthcounter;`)
+  const errorCodesAgg = await client.query(`SELECT to_char(error_timestamp, 'YYYY-MM') as monthcounter, Count(*) as counter FROM ERROR_LOG GROUP BY monthcounter ORDER BY monthcounter;`)
+  const distinctCodesAgg = await client.query(`SELECT to_char(req_timestamp, 'YYYY-MM') as monthcounter, Count(DISTINCT(final_rescode)) as counter FROM SERVICE_REQUEST GROUP BY monthcounter ORDER BY monthcounter;`)
+  await client.end()
+  res.send({
+      'totalIncidents': totalIncidents.rows[0].count,
+      'numResolved': numResolved.rows[0].count,
+      'totalErrorCodes': totalErrorCodes.rows[0].count,
+      'uniqueResCodes': uniqueResCodes.rows,
+      'incidentsAgg': incidentsAgg.rows,
+      'errorCodesAgg': errorCodesAgg.rows,
+      'distinctCodesAgg': distinctCodesAgg.rows
+  });
+})
+
+app.get('/resolutions', async function(req, res)  {
+  // FIXME add datetime range filter !!!
+  const client = new Client(dbconfig)
+  await client.connect()
+  const totalIncidents = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST;`)
+  const numResolved = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST WHERE req_status='RESOLVED';`)
+  const totalErrorCodes = await client.query(`SELECT COUNT(*) FROM ERROR_LOG;`)
+  const uniqueResCodes = await client.query(`SELECT final_rescode, COUNT(*) FROM SERVICE_REQUEST GROUP BY final_rescode;`)
+  await client.end()
+  res.send({
+      'totalIncidents': totalIncidents.rows[0].count,
+      'numResolved': numResolved.rows[0].count,
+      'totalErrorCodes': totalErrorCodes.rows[0].count,
+      'uniqueResCodes': uniqueResCodes.rows
+  });
+})
+
+app.get('/', async function(req, res)  {
+  // FIXME add datetime range filter !!!
+  const client = new Client(dbconfig)
+  await client.connect()
+  const totalIncidents = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST;`)
+  const numResolved = await client.query(`SELECT COUNT(*) FROM SERVICE_REQUEST WHERE req_status='RESOLVED';`)
+  const totalErrorCodes = await client.query(`SELECT COUNT(*) FROM ERROR_LOG;`)
+  const uniqueResCodes = await client.query(`SELECT final_rescode, COUNT(*) FROM SERVICE_REQUEST GROUP BY final_rescode;`)
+  await client.end()
+  res.send({
+      'totalIncidents': totalIncidents.rows[0].count,
+      'numResolved': numResolved.rows[0].count,
+      'totalErrorCodes': totalErrorCodes.rows[0].count,
+      'uniqueResCodes': uniqueResCodes.rows
+  });
+})
+
 app.get('/errorlogs', async function(req, res) {
   var sr_id = req.query.sr_id
   console.log(req.query)
-  const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: '',
-    port: 5432,
-  })
+  const client = new Client(dbconfig)
   await client.connect()
   const errors = await client.query(`SELECT * FROM ERROR_LOG WHERE sr_id='${sr_id}' LIMIT 20;`)
   await client.end()
-  console.log(errors.rows)
   res.send(errors.rows)
-
 })
 
 

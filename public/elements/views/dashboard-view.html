@@ -60,7 +60,7 @@
     <div class="u-1/4-desk-and-up u-pr++ u-mb-">
       <div style="width: 250px;height: -10px; margin-left: 30px; margin-top: -10px; padding-top: -10px;">
         <px-gauge
-        value="30"
+        id="unresolvedCount"
         min="0"
         max="100"
         bar-width="30"
@@ -77,12 +77,9 @@
     <px-kpi
     spark-type="line"
     label="Total Incidents"
-    value="1603"
+    id="totalIncidents"
     uom="Incidents"
-    status-icon="px-nav:up"
-    status-color="green"
-    status-label="12%"
-    spark-data='[{"x":1397102460000,"y":0.56},{"x":1397139660000,"y":0.4},{"x":1397177400000,"y":0.43},{"x":1397228040000,"y":0.33},{"x":1397248260000,"y":0.47},{"x":1397291280000,"y":0.41},{"x":1397318100000,"y":0.26},{"x":1397342100000,"y":0.42},{"x":1397390820000,"y":0.27},{"x":1397408100000,"y":0.38},{"x":1397458800000,"y":0.36},{"x":1397522940000,"y":0.32}]'>
+    spark-data='[{"x":1397102460000,"y":0.56}]'>
   </px-kpi>
 </div>
 
@@ -90,12 +87,12 @@
   <px-kpi
   spark-type="line"
   label="Total Error Codes"
-  value="19348"
+  id='totalErrorCodes'
   uom="TARGET"
   status-icon="px-utl:add"
   status-color="green"
   status-label="1.12"
-  spark-data='[{"x":1397102460000,"y":0.56},{"x":1397139660000,"y":0.4},{"x":1397177400000,"y":0.43},{"x":1397228040000,"y":0.33},{"x":1397248260000,"y":0.47},{"x":1397291280000,"y":0.41},{"x":1397318100000,"y":0.26},{"x":1397342100000,"y":0.42},{"x":1397390820000,"y":0.27},{"x":1397408100000,"y":0.38},{"x":1397458800000,"y":0.36},{"x":1397522940000,"y":0.32}]'>
+  spark-data='[{"x":1397102460000,"y":0.56}]'>
 </px-kpi>
 </div>
 
@@ -103,11 +100,8 @@
   <px-kpi
   spark-type="bar"
   label="Resolution Types"
-  value="11"
+  id='resolutionTypes'
   uom="TARGET"
-  status-icon="px-utl:add"
-  status-color="green"
-  status-label="1.12"
   spark-data='[112,57,53,122,128,120]'>
 </px-kpi>
 </div>
@@ -183,24 +177,25 @@
     <div style="padding: 10px 20px;">
     <px-vis-pie-chart
     id='errorpiechart'
-    width="300"
+    width="400"
     height="300"
-    chart-horizontal-alignment="right"
+    chart-horizontal-alignment="center"
     chart-vertical-alignment="center"
     margin='{"top":"10","bottom":"10","left":"30","right":"10"}'
     inner-radius="0"
     title="Error Codes Breakdown"
     title-spacing="5"
     use-percentage
-    decimal-percentage="0"
+    decimal-percentage="2"
     max-registers="0"
-    series-config='{"mySerie":{"xAxisUnit":"code(s)","y":"y","x":"x"}}'
+    hide-register="true"
+    series-config='{"mySerie":{"xAxisUnit":"","y":"y","x":"x"}}'
     ></px-vis-pie-chart>
   </div>
   </div>
 
 </div>
-<iron-ajax id="aboutContentAjaxEl" handle-as="text"></iron-ajax>
+<iron-ajax id="dashboardAjax" handle-as="text"></iron-ajax>
 </template>
 <script>
 Polymer({
@@ -208,12 +203,49 @@ Polymer({
   properties: {},
   ready: function() {
     var that = this;
-    this.$.aboutContentAjaxEl.url = "/trends";
+    this.$.dashboardAjax.url = "/dashboard";
 
-    this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
-      that.$.aboutContentMarkdown.markdown = evt.detail.response;
+    this.$.dashboardAjax.addEventListener('response', function(evt) {
+      const jsonData = JSON.parse(evt.detail.response);
+      let unresolved = jsonData.totalIncidents - jsonData.numResolved;
+      document.getElementById('unresolvedCount').value = unresolved;
+      document.getElementById('totalIncidents').value = jsonData.totalIncidents;
+      document.getElementById('totalErrorCodes').value = jsonData.totalErrorCodes;
+      document.getElementById('resolutionTypes').value = jsonData.uniqueResCodes.length - 1;
+      document.getElementById('errorcodetable').tableData = jsonData.uniqueResCodes;
+
+      document.getElementById('errorpiechart').chartData = jsonData.uniqueResCodes.map((item) => {
+        return {
+          'y': item['final_rescode'],
+          'x': parseInt(item['counter'])
+        };
+      });
+      console.log(jsonData);
+
+      let incidentsSparkData = jsonData.incidentsAgg.map((item, _) => {
+        return {
+          'x': _,
+          'y': parseInt(item['counter']),
+          'z': item['monthcounter']
+        };
+      });
+      document.getElementById('totalIncidents').sparkData = incidentsSparkData;
+
+      let errorCodesSparkData = jsonData.errorCodesAgg.map((item, _) => {
+        return {
+          'x': _,
+          'y': parseInt(item['counter']),
+          'z': item['monthcounter']
+        };
+      });
+      document.getElementById('totalErrorCodes').sparkData = errorCodesSparkData;
+
+      let rescodeTypeSparkData = jsonData.distinctCodesAgg.map((item, _) => {
+        return parseInt(item['counter']);
+      });
+      document.getElementById('resolutionTypes').sparkData = rescodeTypeSparkData;
     });
-    this.$.aboutContentAjaxEl.generateRequest();
+    this.$.dashboardAjax.generateRequest();
   }
 });
 </script>
