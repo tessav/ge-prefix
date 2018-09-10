@@ -257,15 +257,29 @@ app.get('/dashboard', async function(req, res)  {
 })
 
 app.get('/resolutions', async function(req, res)  {
-  // FIXME add resolution
-  const rescode = 'Perform_LFC_and_system_software_reload'
+  let rescode = req.query.q
+  //const rescode = 'Perform_LFC_and_system_software_reload'
   const client = new Client(dbconfig)
+  let uniqueResCodes
+  let lastResolution
+  let avgFrequency
+  let errorCodes
+  let srHeatmap
   await client.connect()
-  const uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
-  const lastResolution = await client.query(`SELECT to_char(MAX(req_timestamp), 'DD-MM-YYYY') as last_resolution from SERVICE_REQUEST;`)
-  const avgFrequency = await client.query(`SELECT DATE_PART('day', MAX(req_timestamp) - MIN(req_timestamp)) / COUNT(*) as freq from SERVICE_REQUEST WHERE final_rescode='${rescode}';`)
-  const errorCodes = await client.query(`SELECT el.error_code as error_code, COUNT(*) as counter FROM ERROR_LOG el, SERVICE_REQUEST sr WHERE sr.final_rescode='${rescode}' AND el.sr_id=sr.sr_id GROUP BY el.error_code ORDER BY counter DESC;`)
-  const srHeatmap = await client.query(`SELECT to_char(req_timestamp, 'YYYY') as year, to_char(req_timestamp, 'Mon') as month, COUNT(*) FROM service_request GROUP BY year, month ORDER BY year,month;`)
+  if (rescode) {
+    uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+    lastResolution = await client.query(`SELECT to_char(MAX(req_timestamp), 'DD-MM-YYYY') as last_resolution from SERVICE_REQUEST WHERE final_rescode='${rescode}';`)
+    avgFrequency = await client.query(`SELECT DATE_PART('day', MAX(req_timestamp) - MIN(req_timestamp)) / COUNT(*) as freq from SERVICE_REQUEST WHERE final_rescode='${rescode}';`)
+    errorCodes = await client.query(`SELECT el.error_code as error_code, COUNT(*) as counter FROM ERROR_LOG el, SERVICE_REQUEST sr WHERE sr.final_rescode='${rescode}' AND el.sr_id=sr.sr_id GROUP BY el.error_code ORDER BY counter DESC;`)
+    srHeatmap = await client.query(`SELECT to_char(req_timestamp, 'YYYY') as year, to_char(req_timestamp, 'Mon') as month, COUNT(*) FROM service_request WHERE final_rescode='${rescode}' GROUP BY year, month ORDER BY year,month;`)
+  } else {
+    uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+    lastResolution = await client.query(`SELECT to_char(MAX(req_timestamp), 'DD-MM-YYYY') as last_resolution from SERVICE_REQUEST;`)
+    avgFrequency = await client.query(`SELECT DATE_PART('day', MAX(req_timestamp) - MIN(req_timestamp)) / COUNT(*) as freq from SERVICE_REQUEST;`)
+    errorCodes = await client.query(`SELECT el.error_code as error_code, COUNT(*) as counter FROM ERROR_LOG el, SERVICE_REQUEST sr WHERE el.sr_id=sr.sr_id GROUP BY el.error_code ORDER BY counter DESC;`)
+    srHeatmap = await client.query(`SELECT to_char(req_timestamp, 'YYYY') as year, to_char(req_timestamp, 'Mon') as month, COUNT(*) FROM service_request GROUP BY year, month ORDER BY year,month;`)
+  }
+
   await client.end()
   res.send({
       'uniqueResCodes': uniqueResCodes.rows,

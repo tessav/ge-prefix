@@ -43,59 +43,54 @@
         </div>
 
         <div class="u-1/4-desk-and-up u-pr++ u-mb-">
-          <!-- <px-typeahead
-          placeholder="Select resolution code"
-          required
-          max-suggestions="10"
-          local-candidates='["Alabama","Alaska","American Samoa","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District Of Columbia","Federated States Of Micronesia","Florida","Georgia","Guam","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Marshall Islands","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Northern Mariana Islands","Ohio","Oklahoma","Oregon","Palau","Pennsylvania","Puerto Rico","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virgin Islands","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]'
-          prefetch-url="https://www.predix-ui.com/px-typeahead/px-typeahead/countries.json">
-        </px-typeahead> -->
         <px-dropdown
         id="rescodeDropdown"
         style="margin-top: 5px;"
-items='[{"key":"1","val":"iPhone"},{"key":"2","val":"Android"},{"key":"3","val":"Blackberry"},{"key":"4","val":"Windows Phone"},{"key":"5","val":"Flip Phone","disabled":true}]'
-sort-mode="key"
-button-style="tertiary"
-display-value="All Resolution Codes"
-search-mode
-trigger-height="30">
-</px-dropdown>
-      </div>
-
+        items='[{"key":"1","val":"None found"}]'
+        sort-mode="key"
+        button-style="tertiary"
+        display-value="All Resolution Codes"
+        search-mode
+        opened-changed='selectedRescode'
+        selected-changed="selectedRescode"
+        trigger-height="30">
+      </px-dropdown>
     </div>
-  </px-card>
 
-  <br />
-
-  <div class="flex flex--justify flex--wrap u-p" style="margin: 5px 20px;">
-
-    <div class="u-1/4-desk-and-up u-pr++ u-mb-">
-      <px-key-value-pair
-      label="LAST RESOLUTION"
-      id='lastResolution'
-      value="0"
-      uom=""
-      size="gamma">
-    </px-key-value-pair>
   </div>
+</px-card>
+
+<br />
+
+<div class="flex flex--justify flex--wrap u-p" style="margin: 5px 20px;">
 
   <div class="u-1/4-desk-and-up u-pr++ u-mb-">
     <px-key-value-pair
-    label="AVERAGE FREQUENCY"
-    id='avgFrequency'
+    label="LAST RESOLUTION"
+    id='lastResolution'
     value="0"
-    uom="days"
-    size="gamma"></px-key-value-pair>
-  </div>
-
-  <div class="u-1/4-desk-and-up u-pr++ u-mb-">
-    <px-key-value-pair
-    label="TOP TOPIC"
-    id='topTopic'
-    value=""
     uom=""
     size="gamma">
   </px-key-value-pair>
+</div>
+
+<div class="u-1/4-desk-and-up u-pr++ u-mb-">
+  <px-key-value-pair
+  label="MEAN FREQUENCY"
+  id='avgFrequency'
+  value="0"
+  uom="days"
+  size="gamma"></px-key-value-pair>
+</div>
+
+<div class="u-1/4-desk-and-up u-pr++ u-mb-">
+  <px-key-value-pair
+  label="TOP TOPIC"
+  id='topTopic'
+  value=""
+  uom=""
+  size="gamma">
+</px-key-value-pair>
 </div>
 
 <div class="u-1/4-desk-and-up u-pr++ u-mb-">
@@ -110,6 +105,55 @@ trigger-height="30">
 </div>
 
 <div class="flex flex--wrap u-p">
+
+  <div class="u-2/3-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
+      <span class="heading--subsection">SERVICE REQUEST HEATMAP</span>
+    </div>
+    <div style="padding: 10px 60px; align: center">
+      <px-heatmap-grid
+      id='heatmap'
+      scale-min="0"
+      >
+    </px-heatmap-grid><br /><br />
+  </div>
+</div>
+
+<div class="u-1/3-desk-and-up u-pr++ u-mb-">
+  <div class="u-p">
+    <span class="heading--subsection">RELATED RESOLUTION CODES</span>
+  </div>
+  <div style="padding: 10px;">
+    <div style="padding: 10px 10px;">
+
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Rank</th>
+            <th>Resolution Code</th>
+            <th>Similarity</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>No_Structural_Problem_Found</td>
+            <td>60%</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>No_Structural_Problem_Found</td>
+            <td>60%</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>No_Structural_Problem_Found</td>
+            <td>60%</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
   <div class="u-1/2-desk-and-up u-pr++ u-mb-">
     <div class="u-p">
@@ -141,68 +185,21 @@ trigger-height="30">
       hide-register="true"
       series-config='{"mySerie":{"xAxisUnit":"","y":"y","x":"x"}}'
       ></px-vis-pie-chart>
-  </div>
-  </div>
-
-  <div class="u-1/2-desk-and-up u-pr++ u-mb-">
-    <div class="u-p">
-      <span class="heading--subsection">ASSOCIATED SYMPTOM WORD CLOUD</span>
     </div>
   </div>
 
   <div class="u-1/2-desk-and-up u-pr++ u-mb-">
     <div class="u-p">
+      <span class="heading--subsection">ASSOCIATED SYMPTOM TERMS</span>
+    </div>
+    <div style="padding: 20px;">
+      <px-data-table id='symptomtable' page-size="5"></px-data-table>
+    </div>
+  </div>
+
+  <div class="u-1/2-desk-and-up u-pr++ u-mb-">
+    <div class="u-p">
       <span class="heading--subsection">ASSOCIATED SYMPTOM WORD CLOUD</span>
-    </div>
-  </div>
-
-  <div class="u-2/3-desk-and-up u-pr++ u-mb-">
-    <div class="u-p">
-      <span class="heading--subsection">SERVICE REQUEST HEATMAP</span>
-    </div>
-    <div style="padding: 10px 60px; align: center">
-    <px-heatmap-grid
-    id='heatmap'
-    scale-min="0"
-    scale-max="300"
-    >
-    </px-heatmap-grid>
-    </div>
-  </div>
-
-  <div class="u-1/3-desk-and-up u-pr++ u-mb-">
-    <div class="u-p">
-      <span class="heading--subsection">RELATED RESOLUTION CODES</span>
-    </div>
-    <div style="padding: 10px;">
-      <div style="padding: 10px 10px;">
-
-        <table class="table">
-          <tbody>
-            <tr>
-              <th>Rank</th>
-              <th>Resolution Code</th>
-              <th>Similarity</th>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>No_Structural_Problem_Found</td>
-              <td>60%</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>No_Structural_Problem_Found</td>
-              <td>60%</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>No_Structural_Problem_Found</td>
-              <td>60%</td>
-            </tr>
-
-          </tbody>
-        </table>
-      </div>
     </div>
   </div>
 
@@ -215,10 +212,14 @@ Polymer({
   is: 'trends-view',
   properties: {},
   ready: function() {
+    this.callData('');
+    setTimeout(() => { this.prepRescodeFilter(); }, 500);
+  },
+  callData: function(query) {
     var that = this;
-    this.$.aboutContentAjaxEl.url = "/resolutions";
+    this.$.aboutContentAjaxEl.url = `/resolutions?q=${query}`;
 
-    this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
+    this.$.aboutContentAjaxEl.addEventListener('response', (evt) => {
 
       let jsonData = JSON.parse(evt.detail.response);
       console.log(jsonData);
@@ -231,7 +232,7 @@ Polymer({
 
       document.getElementById('lastResolution').value = jsonData.lastResolution;
       document.getElementById('avgFrequency').value = jsonData.avgFrequency.toFixed(1);
-      document.getElementById('topErrorCode').value = jsonData.errorCodes ? jsonData.errorCodes[0]['error_code'] : 'NIL';
+      document.getElementById('topErrorCode').value = jsonData.errorCodes[0] ? jsonData.errorCodes[0]['error_code'] : 'NIL';
       document.getElementById('errorcodetable').tableData = jsonData.errorCodes;
       document.getElementById('errorpiechart').chartData = jsonData.errorCodes.map((item) => {
         return {
@@ -243,9 +244,13 @@ Polymer({
       let heatmapData = []
       let cellMapping = {}
       let distinctYears = {}
+      let topCount = 0
       for (let cell of jsonData.srHeatmap) {
         cellMapping[`${cell['year']}-${cell['month']}`] = cell['count'];
         distinctYears[cell['year']] = 1;
+        if (cell['count'] > topCount) {
+          topCount = cell['count']
+        }
       }
       const monthMapping = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       for (let distinctYear of Object.keys(distinctYears)) {
@@ -257,13 +262,19 @@ Polymer({
           })
         }
       }
-
+      document.getElementById('heatmap').scaleMax = topCount;
       document.getElementById('heatmap').heatmapData = heatmapData;
     });
 
     this.$.aboutContentAjaxEl.generateRequest();
 
+  },
+  prepRescodeFilter: function() {
+    document.getElementById('rescodeDropdown').addEventListener('selected-changed', (evt) => {
+      this.callData(evt.detail.value);
+    });
   }
+
 });
 </script>
 </dom-module>
