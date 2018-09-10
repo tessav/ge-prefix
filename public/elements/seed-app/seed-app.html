@@ -19,11 +19,21 @@
 <link rel="import" href="../../bower_components/px-icon-set/px-icon.html">
 <link rel="import" href="../../bower_components/px-icon-set/px-icon-set.html">
 
+
+<link rel="import" href="../../bower_components/px-popover/px-popover.html">
+
 <dom-module id="seed-app">
   <template>
 
     <!-- apply imported seed app style module -->
     <style include="seed-app-styles"></style>
+    <style>
+    .help-icon {
+      --iron-icon-width: 22px;
+      --iron-icon-height: 22px;
+      margin-top: 2px;
+    }
+    </style>
 
     <px-branding-bar application-title="[[appHeader]]"></px-branding-bar>
 
@@ -47,8 +57,26 @@
             selected-route="{{navRoute}}">
           </px-app-nav>
         </div>
-        <div class="u-1/1-palm">
+        <div class="u-1/4-desk">
           <div class="flex flex--row flex--right">
+            <p class="actionable" id='helpIcon' style="margin-right: 20px;">
+              <px-icon icon="px-utl:help" class="help-icon"></px-icon>
+            </p>
+            <px-popover for="helpIcon"
+                        orientation="bottom"
+                        enhanced
+                        scroll-action="lock">
+                        <div style="text-align: left;">
+            Suggested Workflow:
+            <ol style="padding-left: 0;">
+              <li><b>Datasource Tab:</b> Add a service incident.</li>
+              <li><b>Incident Tab:</b> View incident's predicted resolution codes.</li>
+              <li><b>Resolution Tab:</b> Drill down on predicted codes to troubleshoot.</li>
+              <li><b>Incident Tab:</b> Enter actual resolution code when resolved.</li>
+              <li><b>Dashboard Tab:</b> Monitor incidents over time.</li>
+            </ol>
+          </div>
+            </px-popover>
             <px-login class="u-pr u-pt"></px-login>
           </div>
         </div>

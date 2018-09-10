@@ -22,6 +22,7 @@ var userInfo = require('./routes/user-info');
 var app = express();
 var httpServer = http.createServer(app);
 var dataExchange = require('./routes/data-exchange');
+var moment = require('moment');
 // var fs = require("fs");
 // var assettemplatefile = "sample-data/predix-asset/compressor-2017-clone.json";
 
@@ -213,23 +214,36 @@ app.get('/config', function(req, res) {
 });
 
 app.post('/runmodel', async function(req, res) {
-  console.log(req.body);
-  console.log('running model');
+  const error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
+    return {
+      'error_code': log.split(',')[0].trim(),
+      'error_timestamp': log.split(',')[1].trim()
+    };
+  });
+  const req_timestamp = moment().format()
   const client = new Client(dbconfig)
   await client.connect()
-  const pgres = await client.query(
-    `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '7/31/2015 21:25');`)
-  console.log(pgres)
+  // INSERT INTO SERVICE REQUEST TABLE
+  const svcReq = await client.query(
+    `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '${req_timestamp}') RETURNING *;`)
+  // INSERT INTO ERROR LOGS TABLE
+  for (let error_log of error_list) {
+    console.log(error_log)
+    await client.query(
+      `INSERT INTO error_log(error_code, error_timestamp, sr_id) VALUES ('${error_log.error_code}', '${error_log.error_timestamp}', '${req.body.sr_id}');`)
+  }
+  res.send('created') // for directing user to newly created incident view
+  // CALL RUN-MODEL ANALYTICS TO GET PREDICTION
+
+  // UPDATE SERVICE REQUEST STATUS AND PREDICTED RESCODES
   await client.end()
-  res.send('ran model');
 });
 
 app.get('/issues', async function(req, res) {
   const client = new Client(dbconfig)
   await client.connect()
-  const pgres = await client.query('SELECT * FROM SERVICE_REQUEST LIMIT 20;')
+  const pgres = await client.query('SELECT * FROM SERVICE_REQUEST ORDER BY req_timestamp DESC LIMIT 30;')
   await client.end()
-  console.log(pgres.rows)
   res.send(pgres.rows);
 })
 

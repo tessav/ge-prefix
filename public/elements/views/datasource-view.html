@@ -1,7 +1,9 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
+<link rel="import" href="../../bower_components/px-tooltip/px-tooltip.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/px-spinner/px-spinner.html">
 <!-- import page level css -->
 <link rel="import" href="../seed-app/seed-app-styles.html">
 
@@ -22,13 +24,22 @@
       <div class="heading--page">Add Service Incident</div><br/>
       <label for="input1">Service Request ID</label><br />
       <input class="text-input" id="sr_id" type="text"><br /><br />
-      <label for="input1">Error Codes</label><br />
+      <label for="input1">Error Codes &nbsp;
+        <px-tooltip
+          smart-orientation
+          for="infoIcon"
+          delay="50"
+          tooltip-message="In format: error code,timestamp (e.g. 200002305,2014-08-24 04:41:48)"
+          orientation="auto">
+        </px-tooltip>
+        <px-icon id='infoIcon' icon="px-utl:information"></px-icon>
+</label><br />
       <textarea id="error_code"></textarea><br /><br />
       <label for="input1">Customer Symptom</label><br />
       <textarea id="symptom"></textarea><br /><br />
       <button class="btn btn--call-to-action" on-tap="_diagnose">Add</button>
-      <button class="btn btn--regular" on-tap="_cancel">Cancel</button>
-
+      <button class="btn btn--regular" on-tap="_cancel">Cancel</button><br /><br />
+      <px-spinner id="loading-spinner" size="40" finished></px-spinner>
       <iron-ajax id="aboutContentAjaxEl" method="POST" handle-as="json" content-type="application/json">
       </iron-ajax>
     </px-card>
@@ -45,14 +56,20 @@
       },
       _diagnose: function() {
         var that = this;
+        document.getElementById('loading-spinner').finished = false;
         this.$.aboutContentAjaxEl.url = "/runmodel";
         this.$.aboutContentAjaxEl.body = {
           "sr_id": document.getElementById('sr_id').value,
           "symptom": document.getElementById('symptom').value,
-          "error_code": document.getElementById('error_code').value
+          "error_logs": document.getElementById('error_code').value
         };
         this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
           console.log(evt);
+          setTimeout(() => {
+            document.getElementById('loading-spinner').finished = false;
+            window.history.pushState({}, null, '/#/diagnosis');
+            window.dispatchEvent(new CustomEvent('location-changed'));
+          }, 1000);
         });
         this.$.aboutContentAjaxEl.generateRequest();
       }

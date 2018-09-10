@@ -41,7 +41,7 @@
         <div class="u-1/4-desk-and-up u-pr++ u-mb-">
           <px-key-value-pair class="u-mv" label="Status" value="" size="delta">
           </px-key-value-pair>
-          <div style=" background-color: #fec617; margin-top: 10px; padding: 2px 10px;"><span id="req_status" style="font-size: 17px;"></span></div>
+          <div id="req-status-box" style=" background-color: #fec617; margin-top: 10px; padding: 2px 10px;"><span id="req_status" style="font-size: 17px;"></span></div>
           <br />
           <px-key-value-pair class="u-mv" label="Received Date/Time" value="" id="timestamp" size="delta"></px-key-value-pair>
         </div>
@@ -172,7 +172,7 @@ Polymer({
           "id":item['sr_id'],
           "title":item['sr_id'],
           "subtitle":item['symptom'],
-          "severity":"important",
+          "severity":(item['req_status'] === 'RESOLVED') ? 'healthy': 'important',
           "date":item['req_timestamp'],
           "sr_id": item['sr_id'],
           "symptom": item['symptom'],
@@ -190,11 +190,22 @@ Polymer({
           // "model":"7FA+e"
         };
       });
+      demo.selectedItem = 0; // default select first item in list
+
       demo.addEventListener('selected-item-ref-changed', (selectedItem) => {
         selected = selectedItem.detail.value;
         document.getElementById('sr_id').innerHTML = selected['sr_id'];
         document.getElementById('symptom').innerHTML = selected['symptom'];
         document.getElementById('timestamp').value = selected['req_timestamp'];
+        let req_status_color
+        if (selected['req_status'] === 'RESOLVED') {
+          req_status_color = '#b4e34f';
+        } else if (selected['req_status'] === 'FOR REVIEW') {
+          req_status_color = '#58abee';
+        } else {
+          req_status_color = '#ffe070';
+        }
+        document.getElementById('req-status-box').style['background-color'] = req_status_color;
         //document.getElementById('final_rescode').value = selected['final_rescode'];
         //document.getElementById('predicted_rescodes').value = selected['predicted_rescodes'];
         document.getElementById('req_status').innerHTML = selected['req_status'];
