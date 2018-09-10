@@ -49,7 +49,7 @@
         <div class="u-1/4-desk-and-up u-pr++ u-mb-">
           <px-key-value-pair class="u-mv" label="Model" value="Optima 660" size="delta"></px-key-value-pair>
           <br />
-          <px-key-value-pair class="u-mv" label="Error Code Count" value="5" size="delta"></px-key-value-pair>
+          <px-key-value-pair class="u-mv" label="Error Code Count" id="errorCount" size="delta"></px-key-value-pair>
         </div>
 
         <div class="u-1/2-desk-and-up u-pr++ u-mb-">
@@ -105,20 +105,9 @@
               </tr>
               <tr>
                 <td>1</td>
-                <td>No_Structural_Problem_Found</td>
-                <td>60%</td>
+                <td id="predictedRescode"></td>
+                <td></td>
               </tr>
-              <tr>
-                <td>2</td>
-                <td>No_Structural_Problem_Found</td>
-                <td>60%</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>No_Structural_Problem_Found</td>
-                <td>60%</td>
-              </tr>
-
             </tbody>
           </table>
         </div>
@@ -207,8 +196,9 @@ Polymer({
         }
         document.getElementById('req-status-box').style['background-color'] = req_status_color;
         //document.getElementById('final_rescode').value = selected['final_rescode'];
-        //document.getElementById('predicted_rescodes').value = selected['predicted_rescodes'];
+        document.getElementById('predictedRescode').innerHTML= (selected['predicted_rescodes']) ? selected['predicted_rescodes']['predicted'] : 'No prediction yet.';
         document.getElementById('req_status').innerHTML = selected['req_status'];
+
         document.getElementById('errorLogCall').url = `/errorlogs?sr_id=${selected['sr_id']}`;
         document.getElementById('errorLogCall').addEventListener('response', function(evt) {
           document.getElementById('errorcodetable').tableData = evt.detail.response.map((item, _) => {
@@ -220,6 +210,7 @@ Polymer({
           });
 
           let totalCodes = evt.detail.response.length;
+          document.getElementById('errorCount').value = totalCodes;
           let codeDict = {};
           for (let i=0; i<totalCodes; i++) {
             error_code = String(evt.detail.response[i].error_code)

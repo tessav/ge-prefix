@@ -28,12 +28,17 @@ if(node_env === 'development') {
 	settings.rmdDocsURL = devConfig.rmdDocsURL;
 	settings.dataExchangeURL = devConfig.dataExchangeURL;
 	settings.timeSeriesOnly = devConfig.timeSeriesOnly;
+
+	settings.analyticsCatalogUri = devConfig.analyticsCatalogUri;
+	settings.predixZoneId = devConfig.predixZoneId;
+
 } else {
 	// read VCAP_SERVICES
 	var vcapsServices = JSON.parse(process.env.VCAP_SERVICES);
 	var uaaService = vcapsServices[process.env.uaa_service_label];
 	var assetService = vcapsServices['predix-asset'];
 	var timeseriesService = vcapsServices['predix-timeseries'];
+	var analyticsService = vcapsServices['predix-analytics-framework'];
 
 	if(uaaService) {
     	settings.uaaURL = uaaService[0].credentials.uri;
@@ -48,6 +53,13 @@ if(node_env === 'development') {
 		settings.timeseriesURL = timeseriesService[0].credentials.query.uri;
 	}
 
+	if(analyticsService) {
+		settings.predixZoneId = timeseriesService[0].credentials['zone-http-header-value'];
+		settings.analyticsCatalogUri = analyticsService[0].credentials.catalog_uri;
+		console.log(settings.predixZoneId);
+		console.log(settings.analyticsCatalogUri);
+	}
+
 	// read VCAP_APPLICATION
 	var vcapsApplication = JSON.parse(process.env.VCAP_APPLICATION);
 	settings.appURL = 'https://' + vcapsApplication.uris[0];
@@ -59,6 +71,8 @@ if(node_env === 'development') {
 	settings.rmdDocsURL = process.env.rmdDocsURL;
 	settings.dataExchangeURL = process.env.dataExchangeURL;
 	settings.timeSeriesOnly = process.env.timeSeriesOnly;
+	settings.predixZoneId = process.env.predixZoneId;
+	settings.analyticsCatalogUri = process.env.analyticsCatalogUri;
 }
 // console.log('config settings: ' + JSON.stringify(settings));
 
@@ -94,6 +108,14 @@ settings.buildVcapObjectFromLocalConfig = function(config) {
 			}
 		}];
 	}
+	if (config.analyticsCatalogUri) {
+		vcapObj['predix-analytics-framework'] = [{
+			credentials: {
+				uri: config.analyticsCatalogUri,
+				'zone-http-header-value': config.predixZoneId
+			}
+		}];
+	}
 	return vcapObj;
 };
 
@@ -123,6 +145,11 @@ settings.isTimeSeriesConfigured = function() {
 settings.isDataExchangeConfigured = function() {
 	return settings.dataExchangeURL &&
 	settings.dataExchangeURL.indexOf('https') === 0;
+}
+
+settings.isAnalyticsConfigured = function() {
+	return settings.analyticsCatalogUri &&
+	settings.analyticsCatalogUri.indexOf('https') === 0;
 }
 
 function getValueFromEncodedString(encoded, index) {

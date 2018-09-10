@@ -42,6 +42,8 @@
       <px-spinner id="loading-spinner" size="40" finished></px-spinner>
       <iron-ajax id="aboutContentAjaxEl" method="POST" handle-as="json" content-type="application/json">
       </iron-ajax>
+      <iron-ajax id="runModelAjax" method="POST" handle-as="json" content-type="application/json">
+      </iron-ajax>
     </px-card>
   </template>
   <script>
@@ -67,11 +69,24 @@
           console.log(evt);
           setTimeout(() => {
             document.getElementById('loading-spinner').finished = false;
-            window.history.pushState({}, null, '/#/diagnosis');
-            window.dispatchEvent(new CustomEvent('location-changed'));
+            //window.history.pushState({}, null, '/#/diagnosis');
+            //window.dispatchEvent(new CustomEvent('location-changed'));
           }, 1000);
         });
         this.$.aboutContentAjaxEl.generateRequest();
+
+        this.$.runModelAjax.url = '/api/analytics';
+        this.$.runModelAjax.body = {
+	         "data": {
+		           "sr_id": "9876123823",
+		           "error_codes": [],
+		           "symptom": "Site power outage yesterday. UPS in bypass mode and battery breaker will not stay on."
+	         }
+         };
+        this.$.runModelAjax.addEventListener('response', (evt) => {
+          console.log(evt);
+        });
+        this.$.runModelAjax.generateRequest();
       }
     });
   </script>

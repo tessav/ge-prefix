@@ -100,6 +100,9 @@ function getEndpointAndZone(key, credentials) {
 		var urlObj = url.parse(credentials.query.uri);
 		out.serviceEndpoint = urlObj.host ? urlObj.protocol + '//' + urlObj.host : null;
 		out.zoneId = credentials.query['zone-http-header-value'];
+	} else if (key === 'predix-analytics-framework') {
+		out.serviceEndpoint = isValidUrl(credentials.uri) ? credentials.uri : null;
+		out.zoneId = credentials['http-header-value'];
 	}
 	if (!out.serviceEndpoint) {
 		console.log('no proxy set for service: ' + key);

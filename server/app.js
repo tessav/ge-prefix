@@ -22,6 +22,7 @@ var userInfo = require('./routes/user-info');
 var app = express();
 var httpServer = http.createServer(app);
 var dataExchange = require('./routes/data-exchange');
+var analyticsService = require('./routes/analytics-service');
 var moment = require('moment');
 // var fs = require("fs");
 // var assettemplatefile = "sample-data/predix-asset/compressor-2017-clone.json";
@@ -157,6 +158,16 @@ if (!config.isUaaConfigured()) {
         proxy.customProxyMiddleware('/api/updateasset', config.dataExchangeURL, '/services/fdhrouter/fielddatahandler/putfielddata'));
   }
 
+  if (config.analyticsCatalogUri && config.analyticsCatalogUri.indexOf('https') === 0) {
+    console.log('can post to analytics');
+  //   app.post('/api/predix-analytics-framework', proxy.addClientTokenMiddleware,
+  //       proxy.customProxyMiddleware('/api/predix-analytics-framework', config.analyticsCatalogUri, '/api/v1/catalog/analytics/ecf969bb-a6e9-466c-ae24-679384ba45d1/execution'));
+  // }
+    app.post('/api/analytics', proxy.addClientTokenMiddleware, analyticsService.executeAnalytic)
+  }
+
+
+
   //Use this route to make the entire app secure.  This forces login for any path in the entire app.
   app.use('/', passport.authenticate('main', {
       noredirect: false // Redirect the user to the authentication page
@@ -214,29 +225,59 @@ app.get('/config', function(req, res) {
 });
 
 app.post('/runmodel', async function(req, res) {
-  const error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
-    return {
-      'error_code': log.split(',')[0].trim(),
-      'error_timestamp': log.split(',')[1].trim()
-    };
-  });
-  const req_timestamp = moment().format()
-  const client = new Client(dbconfig)
-  await client.connect()
-  // INSERT INTO SERVICE REQUEST TABLE
-  const svcReq = await client.query(
-    `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '${req_timestamp}') RETURNING *;`)
-  // INSERT INTO ERROR LOGS TABLE
-  for (let error_log of error_list) {
-    console.log(error_log)
-    await client.query(
-      `INSERT INTO error_log(error_code, error_timestamp, sr_id) VALUES ('${error_log.error_code}', '${error_log.error_timestamp}', '${req.body.sr_id}');`)
-  }
-  res.send('created') // for directing user to newly created incident view
+  res.send('hello');
+  // const error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
+  //   return {
+  //     'error_code': log.split(',')[0].trim(),
+  //     'error_timestamp': log.split(',')[1].trim()
+  //   };
+  // });
+  // const req_timestamp = moment().format()
+  // const client = new Client(dbconfig)
+  // await client.connect()
+  // // INSERT INTO SERVICE REQUEST TABLE
+  // const svcReq = await client.query(
+  //   `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '${req_timestamp}') RETURNING *;`)
+  // // INSERT INTO ERROR LOGS TABLE
+  // for (let error_log of error_list) {
+  //   console.log(error_log)
+  //   await client.query(
+  //     `INSERT INTO error_log(error_code, error_timestamp, sr_id) VALUES ('${error_log.error_code}', '${error_log.error_timestamp}', '${req.body.sr_id}');`)
+  // }
+  // res.send('created') // for directing user to newly created incident view
+
   // CALL RUN-MODEL ANALYTICS TO GET PREDICTION
+//   const postData = 'grant_type=client_credentials';
+//   const options = {
+//     hostname: 'https://14c0d27c-bcdf-4432-be2c-a096d3bb9477.predix-uaa.run.aws-usw02-pr.ice.predix.io',
+//     path: '/oauth/token',
+//     method: 'POST',
+//     port:80,
+//     headers: {
+//       'Content-Type': 'application/x-www-form-urlencoded',
+//       'Content-Length': Buffer.byteLength(postData),
+//       'Authorization': 'Basic YXBwX2NsaWVudF9pZDpwcmVmaXh3b3Jr'
+//     }
+//   };
+//   const getAccessToken = http.request(options, (res) => {
+//     console.log(`STATUS: ${res.statusCode}`);
+//     console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+//     res.setEncoding('utf8');
+//     res.on('data', (chunk) => {
+//       console.log(`BODY: ${chunk}`);
+//     });
+//     res.on('end', () => {
+//       console.log('No more data in response.');
+//     });
+//   });
+//   getAccessToken.on('error', (e) => {
+//   console.error(`problem with request: ${e.message}`);
+// });
+//   getAccessToken.write(postData);
+//   getAccessToken.end();
 
   // UPDATE SERVICE REQUEST STATUS AND PREDICTED RESCODES
-  await client.end()
+  //await client.end()
 });
 
 app.get('/issues', async function(req, res) {

@@ -51,8 +51,7 @@
         button-style="tertiary"
         display-value="All Resolution Codes"
         search-mode
-        opened-changed='selectedRescode'
-        selected-changed="selectedRescode"
+        selected-changed='selectedRescode'
         trigger-height="30">
       </px-dropdown>
     </div>
@@ -222,7 +221,6 @@ Polymer({
     this.$.aboutContentAjaxEl.addEventListener('response', (evt) => {
 
       let jsonData = JSON.parse(evt.detail.response);
-      console.log(jsonData);
       document.getElementById('rescodeDropdown').items = jsonData.uniqueResCodes.map((item, _) => {
         return {
           'key': item['counter'],
@@ -271,7 +269,7 @@ Polymer({
   },
   prepRescodeFilter: function() {
     document.getElementById('rescodeDropdown').addEventListener('selected-changed', (evt) => {
-      this.callData(evt.detail.value);
+      this.callData((evt.detail.value) ? evt.detail.value : '');
     });
   }
 
