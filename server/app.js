@@ -226,58 +226,36 @@ app.get('/config', function(req, res) {
 
 app.post('/runmodel', async function(req, res) {
   res.send('hello');
-  // const error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
-  //   return {
-  //     'error_code': log.split(',')[0].trim(),
-  //     'error_timestamp': log.split(',')[1].trim()
-  //   };
-  // });
-  // const req_timestamp = moment().format()
-  // const client = new Client(dbconfig)
-  // await client.connect()
-  // // INSERT INTO SERVICE REQUEST TABLE
-  // const svcReq = await client.query(
-  //   `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '${req_timestamp}') RETURNING *;`)
-  // // INSERT INTO ERROR LOGS TABLE
-  // for (let error_log of error_list) {
-  //   console.log(error_log)
-  //   await client.query(
-  //     `INSERT INTO error_log(error_code, error_timestamp, sr_id) VALUES ('${error_log.error_code}', '${error_log.error_timestamp}', '${req.body.sr_id}');`)
-  // }
-  // res.send('created') // for directing user to newly created incident view
+  const error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
+    return {
+      'error_code': log.split(',')[0].trim(),
+      'error_timestamp': log.split(',')[1].trim()
+    };
+  });
+  const req_timestamp = moment().format()
+  const client = new Client(dbconfig)
+  await client.connect()
+  // INSERT INTO SERVICE REQUEST TABLE
+  const svcReq = await client.query(
+    `INSERT INTO service_request(sr_id, symptom, req_status, req_timestamp) VALUES ('${req.body.sr_id}', '${req.body.symptom}', 'PREDICTING', '${req_timestamp}') RETURNING *;`)
+  // INSERT INTO ERROR LOGS TABLE
+  for (let error_log of error_list) {
+    console.log(error_log)
+    await client.query(
+      `INSERT INTO error_log(error_code, error_timestamp, sr_id) VALUES ('${error_log.error_code}', '${error_log.error_timestamp}', '${req.body.sr_id}');`)
+  }
+  await client.end()
+  res.send('created') // FIXME for directing user to newly created incident view
+});
 
-  // CALL RUN-MODEL ANALYTICS TO GET PREDICTION
-//   const postData = 'grant_type=client_credentials';
-//   const options = {
-//     hostname: 'https://14c0d27c-bcdf-4432-be2c-a096d3bb9477.predix-uaa.run.aws-usw02-pr.ice.predix.io',
-//     path: '/oauth/token',
-//     method: 'POST',
-//     port:80,
-//     headers: {
-//       'Content-Type': 'application/x-www-form-urlencoded',
-//       'Content-Length': Buffer.byteLength(postData),
-//       'Authorization': 'Basic YXBwX2NsaWVudF9pZDpwcmVmaXh3b3Jr'
-//     }
-//   };
-//   const getAccessToken = http.request(options, (res) => {
-//     console.log(`STATUS: ${res.statusCode}`);
-//     console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
-//     res.setEncoding('utf8');
-//     res.on('data', (chunk) => {
-//       console.log(`BODY: ${chunk}`);
-//     });
-//     res.on('end', () => {
-//       console.log('No more data in response.');
-//     });
-//   });
-//   getAccessToken.on('error', (e) => {
-//   console.error(`problem with request: ${e.message}`);
-// });
-//   getAccessToken.write(postData);
-//   getAccessToken.end();
 
-  // UPDATE SERVICE REQUEST STATUS AND PREDICTED RESCODES
-  //await client.end()
+app.post('/final-rescode', async function(req, res) {
+  console.log(req.body['sr_id'], req.body['final_rescode'])
+  const client = new Client(dbconfig)
+  await client.connect()
+  const pgres = await client.query(`UPDATE service_request SET req_status='RESOLVED', final_rescode='${req.body.final_rescode}' WHERE sr_id='${req.body.sr_id}';`)
+  await client.end()
+  res.send('updated')
 });
 
 app.get('/issues', async function(req, res) {
@@ -343,6 +321,16 @@ app.get('/resolutions', async function(req, res)  {
       'errorCodes': errorCodes.rows,
       'srHeatmap': srHeatmap.rows
   });
+})
+
+app.get('/all-rescodes', async function(req, res) {
+  const client = new Client(dbconfig)
+  await client.connect()
+  uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+  await client.end()
+  res.send(uniqueResCodes.rows.map((row) => {
+    return row['counter'];
+  }))
 })
 
 app.get('/errorlogs', async function(req, res) {

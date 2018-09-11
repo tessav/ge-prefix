@@ -52,7 +52,7 @@ const executeAnalytic = function(req, res) {
       await client.end()
     } else {
       console.error('ERROR executing analytics: ' + JSON.stringify(response));
-      res.sendStatus(response.statusCode);
+      // res.sendStatus(response.statusCode);
     }
   });
 

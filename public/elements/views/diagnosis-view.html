@@ -4,12 +4,12 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
 <link rel="import" href="../../bower_components/px-inbox/px-inbox.html"/>
-<link rel="import" href="../../bower_components/px-typeahead/px-typeahead.html"/>
+
 <link rel="import" href="../../bower_components/px-vis-pie-chart/px-vis-pie-chart.html"/>
 <link rel="import" href="../../bower_components/px-key-value-pair/px-key-value-pair.html" />
 <!-- import page level css -->
 <link rel="import" href="../seed-app/seed-app-styles.html">
-
+<link rel="import" href="../../bower_components/px-typeahead/px-typeahead.html"/>
 <dom-module id="diagnosis-view">
   <template>
     <style include="seed-app-styles"></style>
@@ -117,15 +117,17 @@
         <div class="u-p">
           <span class="heading--subsection">ACTUAL RESOLUTION CODE</span>
         </div>
-        <div style="padding: 20px 20px">
-          <px-typeahead
+        <div style="padding: 10px 20px">
+          <!-- <px-typeahead
+          id="searchRescodes"
           placeholder="Enter actual resolution code"
           max-suggestions="10"
-          local-candidates='["Alabama","Alaska","American Samoa","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District Of Columbia","Federated States Of Micronesia","Florida","Georgia","Guam","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Marshall Islands","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Northern Mariana Islands","Ohio","Oklahoma","Oregon","Palau","Pennsylvania","Puerto Rico","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virgin Islands","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]'
-          prefetch-url="https://www.predix-ui.com/px-typeahead/px-typeahead/countries.json">
-        </px-typeahead>
-        <br />
-        <button class="btn btn--call-to-action">
+          >
+        </px-typeahead> -->
+        <span id='final_rescode'></span>
+        <input class="text-input" placeholder='Enter actual resolution code' id="final_rescode_input" type="text">
+        <br /><br />
+        <button id="resolveButton" class="btn btn--call-to-action" on-tap='_resolve'>
           <px-icon style="--iron-icon-height:16px;margin-right:5px;" icon="px-utl:confirmed"></px-icon>Resolve
         </button>
       </div>
@@ -141,6 +143,8 @@ content-type="application/json">
 <iron-ajax id="errorLogCall"
 handle-as="json"
 content-type="application/json">
+</iron-ajax>
+<iron-ajax id="updateFinalRescode" method="POST" handle-as="json" content-type="application/json">
 </iron-ajax>
 </template>
 <script>
@@ -195,8 +199,24 @@ Polymer({
           req_status_color = '#ffe070';
         }
         document.getElementById('req-status-box').style['background-color'] = req_status_color;
-        //document.getElementById('final_rescode').value = selected['final_rescode'];
-        document.getElementById('predictedRescode').innerHTML= (selected['predicted_rescodes']) ? selected['predicted_rescodes']['predicted'] : 'No prediction yet.';
+        if (selected['final_rescode']) {
+          console.log(selected['final_rescode']);
+          document.getElementById('final_rescode').innerHTML = selected['final_rescode'];
+          document.getElementById('final_rescode_input').style.display = 'none';
+          document.getElementById('resolveButton').style.display = 'none';
+        } else {
+          document.getElementById('final_rescode').innerHTML = '';
+          document.getElementById('final_rescode_input').style.display = 'block';
+          document.getElementById('resolveButton').style.display = 'block';
+        }
+
+        if (selected['predicted_rescodes']) {
+          const predictedRescode = selected['predicted_rescodes']['predicted'];
+          document.getElementById('predictedRescode').innerHTML = predictedRescode;//'<a href="/#/trends/' + encodeURI(predictedRescode) + `">${predictedRescode}</a>`;
+        } else {
+          document.getElementById('predictedRescode').innerHTML = 'No prediction yet';
+        }
+        (selected['predicted_rescodes']) ? selected['predicted_rescodes']['predicted'] : 'No prediction yet.';
         document.getElementById('req_status').innerHTML = selected['req_status'];
 
         document.getElementById('errorLogCall').url = `/errorlogs?sr_id=${selected['sr_id']}`;
@@ -236,7 +256,18 @@ Polymer({
 
   },
   _resolve: function() {
-
+    this.$.updateFinalRescode.url = '/final-rescode';
+    const final_rescode = document.getElementById('final_rescode_input').value;
+    this.$.updateFinalRescode.body = {
+      'final_rescode': final_rescode,
+      'sr_id': document.getElementById('sr_id').innerHTML
+    };
+    this.$.updateFinalRescode.addEventListener('response', (evt) => {
+      document.getElementById('final_rescode_input').style.display = 'none';
+      document.getElementById('final_rescode').innerHTML = final_rescode;
+      setTimeout(() => { this.ready(); }, 1000)
+    })
+    this.$.updateFinalRescode.generateRequest();
   }
 
 });

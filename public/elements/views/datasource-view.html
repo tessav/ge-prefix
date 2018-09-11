@@ -1,6 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/px-card/px-card.html">
-<link rel="import" href="../../bower_components/px-tooltip/px-tooltip.html">
+<link rel="import" href="../../bower_components/px-popover/px-popover.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/marked-element/marked-element.html">
 <link rel="import" href="../../bower_components/px-spinner/px-spinner.html">
@@ -33,6 +33,19 @@
           orientation="auto">
         </px-tooltip>
         <px-icon id='infoIcon' icon="px-utl:information"></px-icon>
+        <px-popover for="infoIcon"
+                    orientation="right"
+                    enhanced
+                    scroll-action="lock">
+                    <div style="text-align: left;">
+        Format is (<b>error code,timestamp</b>)<br>
+        Example:<br>
+        200002305,2014-08-24 04:41:48<br>
+        200109110,2015-06-01 12:22:32<br>
+        200281001,2015-06-01 12:24:44<br>
+        7,2015-06-01 13:15:54<br>
+      </div>
+        </px-popover>
 </label><br />
       <textarea id="error_code"></textarea><br /><br />
       <label for="input1">Customer Symptom</label><br />
@@ -69,8 +82,8 @@
           console.log(evt);
           setTimeout(() => {
             document.getElementById('loading-spinner').finished = false;
-            //window.history.pushState({}, null, '/#/diagnosis');
-            //window.dispatchEvent(new CustomEvent('location-changed'));
+            window.history.pushState({}, null, '/#/diagnosis');
+            window.dispatchEvent(new CustomEvent('location-changed'));
           }, 1000);
         });
         this.$.aboutContentAjaxEl.generateRequest();
@@ -78,9 +91,9 @@
         this.$.runModelAjax.url = '/api/analytics';
         this.$.runModelAjax.body = {
 	         "data": {
-		           "sr_id": "9876123823",
+		           "sr_id": document.getElementById('sr_id').value,
 		           "error_codes": [],
-		           "symptom": "Site power outage yesterday. UPS in bypass mode and battery breaker will not stay on."
+		           "symptom": document.getElementById('symptom').value
 	         }
          };
         this.$.runModelAjax.addEventListener('response', (evt) => {

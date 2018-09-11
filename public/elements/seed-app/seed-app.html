@@ -45,6 +45,8 @@
       <px-app-route
         id="starterAppRoute"
         route="{{route}}"
+        tail="{{subroute}}"
+        data="{{routeData}}"
         use-hash-as-path
         update-nav-route
         nav-route="{{navRoute}}">
@@ -179,6 +181,7 @@
       },
 
       getHref: function(navRoute) {
+        console.log(navRoute);
         var navRoute = this.$.starterAppRoute.navRoute || ['assets'];
         return '/elements/views/' + navRoute[0] + '-view.html';
       }
