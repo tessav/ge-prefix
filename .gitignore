@@ -12,3 +12,5 @@ build
 .github/
 .vscode/
 predix-scripts/
+sample-data/error-logs
+sample-data/service-requests

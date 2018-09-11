@@ -48,21 +48,21 @@ if (node_env === 'development') {
 
 const { Pool, Client } = require('pg')
 
-// const dbconfig = {
-//   user: 'ud9umpepw3owqbwv',
-//   host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
-//   database: 'postgres',
-//   password: '3le6mxqkjvpaj12yzl6wnen5f',
-//   port: 5432,
-// }
-// FOR DEVELOPMENT
 const dbconfig = {
-  user: 'postgres',
-  host: 'localhost',
+  user: 'ud9umpepw3owqbwv',
+  host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
   database: 'postgres',
-  password: '',
+  password: '3le6mxqkjvpaj12yzl6wnen5f',
   port: 5432,
 }
+// FOR DEVELOPMENT
+// const dbconfig = {
+//   user: 'postgres',
+//   host: 'localhost',
+//   database: 'postgres',
+//   password: '',
+//   port: 5432,
+// }
 
 // Session Storage Configuration:
 // *** Use this in-memory session store for development only. Use redis for prod. **
@@ -273,12 +273,6 @@ app.get('/issues', async function(req, res) {
   await client.connect()
   let pgres = await client.query('SELECT * FROM SERVICE_REQUEST ORDER BY req_timestamp DESC LIMIT 30;')
   await client.end()
-  pgres.rows = pgres.rows.map((row) => {
-    return {
-      ...row,
-      symptom: SqlString.format(row.symptom)
-    }
-  })
   res.send(pgres.rows);
 })
 
