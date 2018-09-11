@@ -1,21 +1,25 @@
 ---
 applications:
   - name: Predix-HelloWorld-WebApp-prefix
-    memory: 128M
+    memory: 512M
     timeout: 180
     buildpack: nodejs_buildpack
     command: node server/app.js
-    path: build/es5-basic
+    #path: build/es5-basic
 services:
  - prefix-uaa
- # - your-name-time-series
+ - prefix-analytics-framework
  # - your-name-asset
 env:
     node_env: cloud
     uaa_service_label : predix-uaa
+    uaaURL: https://14c0d27c-bcdf-4432-be2c-a096d3bb9477.predix-uaa.run.aws-usw02-pr.ice.predix.io
+    clientId: app_client_id
     # Add these values for authentication in the cloud
-    #base64ClientCredential: dWFhLWNsaWVudC1pZDp1YWEtY2xpZW50LWlkLXNlY3JldA==
-    #loginBase64ClientCredential: bG9naW5fY2xpZW50X2lkOnNlY3JldA==
+    base64ClientCredential: YXBwX2NsaWVudF9pZDpwcmVmaXh3b3Jr
+    loginBase64ClientCredential: YXBwX2NsaWVudF9pZDpwcmVmaXh3b3Jr
+    analyticsCatalogUri: https://predix-analytics-catalog-release.run.aws-usw02-pr.ice.predix.io
+    predixZoneId: 7d4c4e3f-b5a5-41d8-918d-9b33f8b4dbb2
     # Use a full wss:// URL for actual web socket server. use /livestream for mock data.
     websocketServerURL: /livestream
     timeSeriesOnly: false

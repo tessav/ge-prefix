@@ -7,12 +7,21 @@ const config = require('../predix-config');
 const { Pool, Client } = require('pg')
 
 const dbconfig = {
-  user: 'postgres',
-  host: 'localhost',
+  user: 'ud9umpepw3owqbwv',
+  host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
   database: 'postgres',
-  password: '',
+  password: '3le6mxqkjvpaj12yzl6wnen5f',
   port: 5432,
 }
+
+// FOR DEVELOPMENT
+// const dbconfig = {
+//   user: 'postgres',
+//   host: 'localhost',
+//   database: 'postgres',
+//   password: '',
+//   port: 5432,
+// }
 
 const executeAnalytic = function(req, res) {
   console.log('executing...');

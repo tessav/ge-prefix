@@ -111,7 +111,7 @@ settings.buildVcapObjectFromLocalConfig = function(config) {
 	if (config.analyticsCatalogUri) {
 		vcapObj['predix-analytics-framework'] = [{
 			credentials: {
-				uri: config.analyticsCatalogUri,
+				catalog_uri: config.analyticsCatalogUri,
 				'zone-http-header-value': config.predixZoneId
 			}
 		}];

@@ -61,6 +61,20 @@
         </div>
         <div class="u-1/4-desk">
           <div class="flex flex--row flex--right">
+            <p class="actionable" id='dbIcon' style="margin-right: 20px;">
+              <px-icon icon="px-utl:upload" class="help-icon"></px-icon>
+            </p>
+            <px-popover for="dbIcon"
+                        orientation="bottom"
+                        enhanced
+                        scroll-action="lock">
+                        <div style="text-align: left;">
+          Load service requests to db<br><br>
+          <button id="load-sr" on-tap="loadSr" method='POST' class="btn btn--primary">Load</button><br><br>
+          Load error logs to db<br><br>
+          <button id="load-el" on-tap="loadEl" method='POST' class="btn btn--primary">Load</button><br>
+          </div>
+            </px-popover>
             <p class="actionable" id='helpIcon' style="margin-right: 20px;">
               <px-icon icon="px-utl:help" class="help-icon"></px-icon>
             </p>
@@ -90,6 +104,8 @@
     </div>
 
     <iron-ajax id="configAjaxEl" url="/config" auto></iron-ajax>
+    <iron-ajax id="loadSRAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
+    <iron-ajax id="loadELAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
   </template>
   <script>
     Polymer({
@@ -184,6 +200,24 @@
         console.log(navRoute);
         var navRoute = this.$.starterAppRoute.navRoute || ['assets'];
         return '/elements/views/' + navRoute[0] + '-view.html';
+      },
+
+      loadEl: function() {
+        this.$.loadELAjax.url = '/loadel'
+        this.$.loadELAjax.body = {'load': 'error log'}
+        this.$.loadELAjax.addEventListener('response', function(evt) {
+          console.log(evt.detail.response)
+        });
+        this.$.loadELAjax.generateRequest();
+      },
+      loadSr: function() {
+        console.log('load service request')
+        this.$.loadSRAjax.url = '/loadsr'
+        this.$.loadSRAjax.body = {'load': 'service request'}
+        this.$.loadSRAjax.addEventListener('response', function(evt) {
+          console.log(evt.detail.response);
+        });
+        this.$.loadSRAjax.generateRequest();
       }
 
     });

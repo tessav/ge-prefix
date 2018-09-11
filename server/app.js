@@ -24,7 +24,9 @@ var httpServer = http.createServer(app);
 var dataExchange = require('./routes/data-exchange');
 var analyticsService = require('./routes/analytics-service');
 var moment = require('moment');
-// var fs = require("fs");
+var parse = require('csv-parse');
+var fs = require("fs");
+var SqlString = require('sqlstring');
 // var assettemplatefile = "sample-data/predix-asset/compressor-2017-clone.json";
 
 /**********************************************************************
@@ -46,6 +48,14 @@ if (node_env === 'development') {
 
 const { Pool, Client } = require('pg')
 
+// const dbconfig = {
+//   user: 'ud9umpepw3owqbwv',
+//   host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
+//   database: 'postgres',
+//   password: '3le6mxqkjvpaj12yzl6wnen5f',
+//   port: 5432,
+// }
+// FOR DEVELOPMENT
 const dbconfig = {
   user: 'postgres',
   host: 'localhost',
@@ -261,8 +271,14 @@ app.post('/final-rescode', async function(req, res) {
 app.get('/issues', async function(req, res) {
   const client = new Client(dbconfig)
   await client.connect()
-  const pgres = await client.query('SELECT * FROM SERVICE_REQUEST ORDER BY req_timestamp DESC LIMIT 30;')
+  let pgres = await client.query('SELECT * FROM SERVICE_REQUEST ORDER BY req_timestamp DESC LIMIT 30;')
   await client.end()
+  pgres.rows = pgres.rows.map((row) => {
+    return {
+      ...row,
+      symptom: SqlString.format(row.symptom)
+    }
+  })
   res.send(pgres.rows);
 })
 
@@ -341,6 +357,61 @@ app.get('/errorlogs', async function(req, res) {
   const errors = await client.query(`SELECT * FROM ERROR_LOG WHERE sr_id='${sr_id}' LIMIT 20;`)
   await client.end()
   res.send(errors.rows)
+})
+
+app.post('/loadsr', async function(req, res) {
+  const client = new Client(dbconfig)
+  await client.connect()
+  const dirPath = 'server/sample-data/service-requests/'
+  fs.readdir(dirPath, async function(err, items) {
+    for (var i=0; i<items.length; i++) { // for each file to upload
+        let rowStore = [[],[],[],[],[]]
+        fs.createReadStream(dirPath + items[i])
+          .pipe(parse({delimiter: ','}))
+          .on('data', async function(csvrow) {
+            rowStore[0].push(csvrow[0]);
+            rowStore[1].push(csvrow[3]);
+            rowStore[2].push(csvrow[2]);
+            rowStore[3].push('RESOLVED');
+            rowStore[4].push(csvrow[1]);
+          })
+          .on('end', async function() {
+            const loadSR = await client.query('INSERT INTO service_request(sr_id, symptom, final_rescode, req_status, req_timestamp) SELECT * FROM UNNEST ($1::text[], $2::text[], $3::text[], $4::text[], $5::timestamp[]);', rowStore)
+            await client.end()
+            res.send('done')
+          });
+    }
+  });
+})
+
+app.post('/loadel', async function(req, res) {
+  const client = new Client(dbconfig)
+  await client.connect()
+  const dirPath = 'server/sample-data/error-logs/'
+  fs.readdir(dirPath, async function(err, items) {
+    for (var i=0; i<items.length; i++) {
+        console.log(items[i])
+        let isHeader = true
+        let rowStore = [[], [], []]
+        fs.createReadStream(dirPath + items[i])
+          .pipe(parse({delimiter: ','}))
+          .on('data', async function(csvrow) {
+              console.log(csvrow);
+              if (isHeader) {
+                isHeader = false
+              } else {
+                rowStore[0].push(csvrow[1]);
+                rowStore[1].push(csvrow[2]);
+                rowStore[2].push(csvrow[0]);
+              }
+          })
+          .on('end', async function() {
+            const errors = await client.query(`INSERT INTO error_log(error_code, error_timestamp, sr_id) SELECT * FROM UNNEST ($1::text[], $2::timestamp[], $3::text[]);`, rowStore)
+            await client.end()
+            res.send('done')
+          });
+    }
+  });
 })
 
 

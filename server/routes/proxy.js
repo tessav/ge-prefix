@@ -81,11 +81,13 @@ function buildDecorator(zoneId) {
 }
 
 function isValidUrl(str) {
-	var urlObj = url.parse(str);
+	console.log("is valid url: ", str);
+	var urlObj = require('url').parse(str);
 	return urlObj.protocol === 'https:' && urlObj.host;
 }
 
 function getEndpointAndZone(key, credentials) {
+	console.log('getEndpointAndZone: ', key, credentials);
 	var out = {};
 	// ugly code needed since vcap service variables are not consistent across services
 	// TODO: all the other predix services
@@ -101,7 +103,7 @@ function getEndpointAndZone(key, credentials) {
 		out.serviceEndpoint = urlObj.host ? urlObj.protocol + '//' + urlObj.host : null;
 		out.zoneId = credentials.query['zone-http-header-value'];
 	} else if (key === 'predix-analytics-framework') {
-		out.serviceEndpoint = isValidUrl(credentials.uri) ? credentials.uri : null;
+		out.serviceEndpoint = isValidUrl(credentials.catalog_uri) ? credentials.catalog_uri : null;
 		out.zoneId = credentials['http-header-value'];
 	}
 	if (!out.serviceEndpoint) {
@@ -111,6 +113,7 @@ function getEndpointAndZone(key, credentials) {
 }
 
 var setProxyRoute = function(key, credentials) {
+	console.log('setProxyRoute: ', credentials);
 	// console.log(JSON.stringify(credentials));
 	var routeOptions = getEndpointAndZone(key, credentials);
 	if (!routeOptions.serviceEndpoint) {
@@ -177,6 +180,7 @@ var setProxyRoutes = function() {
 
 	serviceKeys = Object.keys(vcapServices);
 	serviceKeys.forEach(function(key) {
+		console.log(key, vcapServices[key]);
 		setProxyRoute(key, vcapServices[key][0].credentials);
 	});
 };
