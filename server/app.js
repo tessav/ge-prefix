@@ -48,21 +48,21 @@ if (node_env === 'development') {
 
 const { Pool, Client } = require('pg')
 
-const dbconfig = {
-  user: 'ud9umpepw3owqbwv',
-  host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
-  database: 'postgres',
-  password: '3le6mxqkjvpaj12yzl6wnen5f',
-  port: 5432,
-}
-// FOR DEVELOPMENT
 // const dbconfig = {
-//   user: 'postgres',
-//   host: 'localhost',
+//   user: 'ud9umpepw3owqbwv',
+//   host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
 //   database: 'postgres',
-//   password: '',
+//   password: '3le6mxqkjvpaj12yzl6wnen5f',
 //   port: 5432,
 // }
+// FOR DEVELOPMENT
+const dbconfig = {
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: '',
+  port: 5432,
+}
 
 // Session Storage Configuration:
 // *** Use this in-memory session store for development only. Use redis for prod. **
@@ -174,9 +174,9 @@ if (!config.isUaaConfigured()) {
   //       proxy.customProxyMiddleware('/api/predix-analytics-framework', config.analyticsCatalogUri, '/api/v1/catalog/analytics/ecf969bb-a6e9-466c-ae24-679384ba45d1/execution'));
   // }
     app.post('/api/analytics', proxy.addClientTokenMiddleware, analyticsService.executeAnalytic)
+    app.post('/api/topicdetector', proxy.addClientTokenMiddleware, analyticsService.runTopicDetector)
+    app.post('/api/wordcloud', proxy.addClientTokenMiddleware, analyticsService.runWordcloud)
   }
-
-
 
   //Use this route to make the entire app secure.  This forces login for any path in the entire app.
   app.use('/', passport.authenticate('main', {
@@ -409,6 +409,21 @@ app.post('/loadel', async function(req, res) {
     await client.end()
     res.send('done')
   });
+})
+
+app.post('/loadrc', async function(req, res) {
+  const client = new Client(dbconfig)
+  await client.connect()
+  const uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+  let sqlStr = 'INSERT INTO rescode_store(rescode) VALUES'
+  for (let rescode of uniqueResCodes.rows) {
+    sqlStr += ` ('${rescode.counter}'),`
+  }
+  sqlStr = sqlStr.substring(0, sqlStr.length-1) + ';'
+  console.log(sqlStr)
+  const pgres = await client.query(sqlStr)
+  await client.end()
+  res.send(uniqueResCodes)
 })
 
 

@@ -1,0 +1,96 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/px-card/px-card.html">
+<link rel="import" href="../../bower_components/px-popover/px-popover.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/marked-element/marked-element.html">
+<link rel="import" href="../../bower_components/px-spinner/px-spinner.html">
+<!-- import page level css -->
+<link rel="import" href="../seed-app/seed-app-styles.html">
+
+<dom-module id="configuration-view">
+  <template>
+    <style include="seed-app-styles"></style>
+    <style>
+    px-card {
+      background: white;
+      color: rgb(44, 64, 76);
+      --px-card-header-color: black;
+      padding: 20px 100px;
+    }
+    </style>
+
+    <px-card id="myCard">
+      <br/>
+      <div class="heading--page">Execute Actions</div>
+      <br/><br/><br/>
+      <div style="text-align: left; width: 350px;">
+        <b>Load service requests to db:</b>  &nbsp; &nbsp; &nbsp;
+        <button id="load-sr" on-tap="loadSr" method='POST' class="btn btn--primary" style="float: right">Load</button>
+        <br><br><br>
+
+        <b>Load error logs to db:</b> &nbsp; &nbsp; &nbsp;
+        <button id="load-el" on-tap="loadEl" method='POST' class="btn btn--primary" style="float: right">Load</button>
+        <br><br><br>
+
+        <b>Load resolution codes to db:</b> &nbsp; &nbsp; &nbsp;
+        <button id="load-el" on-tap="loadRc" method='POST' class="btn btn--primary" style="float: right">Load</button>
+        <br><br><br>
+
+        <b>Run resolution code analysis: </b> &nbsp; &nbsp; &nbsp;
+        <button id="load-el" on-tap="_runResolution" method='POST' class="btn btn--primary" style="float: right">Load</button>
+        <br><br><br>
+      </div>
+
+    <px-spinner id="loading-spinner" size="40" finished></px-spinner>
+  </px-card>
+
+  <iron-ajax id="loadSRAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
+  <iron-ajax id="loadELAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
+  <iron-ajax id="loadRCAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
+  <iron-ajax id="runResolutionAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
+</template>
+<script>
+Polymer({
+  is: 'configuration-view',
+  properties: {},
+  ready: function() {
+
+  },
+  loadEl: function() {
+    this.$.loadELAjax.url = '/loadel'
+    this.$.loadELAjax.body = {'load': 'error log'}
+    this.$.loadELAjax.addEventListener('response', function(evt) {
+      console.log(evt.detail.response)
+    });
+    this.$.loadELAjax.generateRequest();
+  },
+  loadSr: function() {
+    console.log('load service request')
+    this.$.loadSRAjax.url = '/loadsr'
+    this.$.loadSRAjax.body = {'load': 'service request'}
+    this.$.loadSRAjax.addEventListener('response', function(evt) {
+      console.log(evt.detail.response);
+    });
+    this.$.loadSRAjax.generateRequest();
+  },
+  loadRc: function() {
+    console.log('load resolution code')
+    this.$.loadRCAjax.url = '/loadrc'
+    this.$.loadRCAjax.body = {'load': 'service request'}
+    this.$.loadRCAjax.addEventListener('response', function(evt) {
+      console.log(evt.detail.response);
+    });
+    this.$.loadRCAjax.generateRequest();
+  },
+  _runResolution: function() {
+    console.log('running resolution...')
+    this.$.runResolutionAjax.url = '/api/run-resolution'
+    this.$.runResolutionAjax.body = {'run': 'resolution'}
+    this.$.runResolutionAjax.addEventListener('response', function(evt) {
+      console.log(evt.detail.response);
+    });
+    this.$.runResolutionAjax.generateRequest();
+  }
+});
+</script>
+</dom-module>

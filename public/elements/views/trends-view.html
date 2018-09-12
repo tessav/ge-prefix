@@ -189,7 +189,7 @@
 
   <div class="u-1/2-desk-and-up u-pr++ u-mb-">
     <div class="u-p">
-      <span class="heading--subsection">ASSOCIATED SYMPTOM TERMS</span>
+      <span class="heading--subsection">ASSOCIATED SYMPTOM TOPICS</span>
     </div>
     <div style="padding: 20px;">
       <px-data-table id='symptomtable' page-size="5"></px-data-table>
@@ -205,6 +205,8 @@
 </div>
 
 <iron-ajax id="aboutContentAjaxEl" handle-as="text"></iron-ajax>
+<iron-ajax id="topicDetectorAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
+<iron-ajax id="wordcloudAjax" method="POST" handle-as="json" content-type="application/json"></iron-ajax>
 </template>
 <script>
 Polymer({
@@ -219,6 +221,7 @@ Polymer({
     this.$.aboutContentAjaxEl.url = `/resolutions?q=${query}`;
 
     this.$.aboutContentAjaxEl.addEventListener('response', (evt) => {
+      document.getElementById('symptomtable').tableData = [];
 
       let jsonData = JSON.parse(evt.detail.response);
       document.getElementById('rescodeDropdown').items = jsonData.uniqueResCodes.map((item, _) => {
@@ -265,6 +268,25 @@ Polymer({
     });
 
     this.$.aboutContentAjaxEl.generateRequest();
+
+    this.$.topicDetectorAjax.url = '/api/topicdetector';
+    this.$.topicDetectorAjax.body = {'rescode': query };
+    this.$.topicDetectorAjax.addEventListener('response', (evt) => {
+      console.log(evt.detail.response)
+      document.getElementById('symptomtable').tableData = evt.detail.response;
+      document.getElementById('topTopic').value = evt.detail.response ? evt.detail.response[0].topic : '';
+    })
+
+    this.$.wordcloudAjax.url = '/api/wordcloud';
+    this.$.wordcloudAjax.body = {'rescode': query };
+    this.$.wordcloudAjax.addEventListener('response', (evt) => {
+      console.log(evt.detail.response)
+    })
+
+    if (query != '') {
+      this.$.topicDetectorAjax.generateRequest();
+      this.$.wordcloudAjax.generateRequest();
+    }
 
   },
   prepRescodeFilter: function() {
