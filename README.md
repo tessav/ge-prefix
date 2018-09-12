@@ -1,11 +1,10 @@
 # Prefix Diagnostic Tool
 
-## What is the Prefix Diagnostic Tool?
+## Overview
 The Prefix Diagnostic Tool ("Prefix") is a data analytics tool that aims to augment remote engineers in troubleshooting the <b>Optima CT660 machine</b>. It provides a simple and intuitive interface for the user to:<br>
 1. Gain an overview of service incidents and track their statuses
 2. Quickly troubleshoot with top resolution codes predicted by the model
 3. Develop an intuition for troubleshooting by aggregating and visualizing data related to resolution codes
-
 
 ## Tech Stack
 1. The frontend utilizes components from [Predix UI Components](https://www.predix-ui.com), which are built on Polymer.
@@ -18,6 +17,15 @@ The Prefix Diagnostic Tool ("Prefix") is a data analytics tool that aims to augm
 
 ## Getting Started - User
 
+### Setup
+In order to log-in, get the username and password that is created with the UAA service bound to this app.
+
+### Proposed Workflow
+1. Datasource Tab: Add a service incident.
+2. Incident Tab: View incident's predicted resolution codes.
+3. Resolution Tab: Drill down on predicted codes to troubleshoot.
+4. Incident Tab: Enter actual resolution code when resolved.
+5. Dashboard Tab: Monitor incidents over time.
 
 ## Getting Started - Developer 
 
