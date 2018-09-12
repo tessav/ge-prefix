@@ -78,14 +78,10 @@ CREATE TABLE error_log (
 ```
 Edit the dbconfig in `app.js` and `analytics-service.js` to your database credentials.
 
-
-### Running in Predix Cloud
-
-
 ## Push to the Cloud
 
-To push the application to a cloud environment, modify the default manifest file (manifest.yml) and using the **cf push** command, as follows:
-
+To push the application to a cloud environment:
+1. Ensure you have the services used in the app already setup and bound to the app
 1. Update corresponding fields in manifest.yml
 2. Push to the cloud with `cf push`
 3. Access the cloud deployment of the application by adding "https://" to the beginning of the URL, and loading that URL in a web browser.
