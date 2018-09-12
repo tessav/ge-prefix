@@ -1,19 +1,25 @@
-# Predix WebApp Starter
+# Prefix Diagnostic Tool
 
-*NOTE:* This project was formerly known as the "Predix Seed." Code for old versions of this project can still be found in the old Github repository:  https://github.com/predixdev/predix-seed
+## What is the Prefix Diagnostic Tool?
+The Prefix Diagnostic Tool ("Prefix") is a data analytics tool that aims to augment remote engineers in troubleshooting the <b>Optima CT660 machine</b>. It provides a simple and intuitive interface for the user to:<br>
+1. Gain an overview of service incidents and track their statuses
+2. Quickly troubleshoot with top resolution codes predicted by the model
+3. Develop an intuition for troubleshooting by aggregating and visualizing data related to resolution codes
 
-## What is the Predix WebApp Starter?
-The Predix WebApp Starter ("Starter") is a web application starter kit aimed to accelerate Predix application development.   It comes in the form of a simple web application, with code examples on features such as branding, theming, layout, navigation, responsiveness, organization of views, data presentation and micro-services integration, to name some.  These working code samples can be straightforwardly customized and adapted to specific application needs. Predix application projects can directly use, remove from or add to these features to achieve prototype or production state much faster than through building everything from scratch.  This speeds up application development, letting developers focus on functionality, instead of having to make boilerplate concerns work.
 
-As its name indicates the Starter is built on [Polymer](http://www.polymer-project.org).  Based on the [Web Component API](https://developer.mozilla.org/en-US/docs/Web/Web_Components), Polymer is a component framework that prefers the browser's native capabilities over HTML and JavaScript enhancements, wherever possible.  And where there are differences in currently available features, polyfills are provided towards consistent cross-browser behavior.  By adopting the Polymer strategy the Starter ensures high consistency of application behavior across browsers, and the best chances of compatibility with future browser versions.
+## Tech Stack
+The frontend utilizes components from [Predix UI Components](https://www.predix-ui.com), which are built on Polymer.
+The backend is implemented with a NodeJS/Express web server which integrates with Predix services like:
+- User account & authentication (UAA)
+- Database as a service (PostgreSQL)
+- Predix logging
+- Analytics framework
+The analytics service (model) is hosted in another repository: []()
 
-Most of the frontend components provided in the Starter are from [Predix UI Components](https://www.predix-ui.com), which are also built on Polymer.  These re-usable UI building blocks have been researched and designed to address the most common UI patterns.  Both built upon Polymer, the Starter and Px Components work together out-of-the-box.  Px Components can be used independently, or in combination with one another and with the Starter.  This achieves consistent behavior, look-and-feel, and high code re-use.
+## Getting Started - User
 
-The backend of the Starter is implemented as a NodeJS/Express web server.  It presently includes a minimal set of public modules and a couple of Predix-specific modules (for session and proxy concerns, for example).  Similar to the frontend, it is also straightforwardly customizable, even replaceable by another server application, if so desired.  [NodeJS](http://nodejs.org) is a server-side application framework based on JavaScript.  It enjoys strong growth and huge adoption in the server applications community.
 
-Many features offered by the Starter are from open-source component projects, many of which are actively discussed and contributed to.  This provides developers with available documentation and help in using such components for their projects.
-
-## Getting Started
+## Getting Started - Developer 
 
 ### Get the source code
 Make a directory for your project.  Clone or download and extract the starter in that directory.
@@ -121,20 +127,8 @@ The simplest way to push the Starter application to a cloud environment is by mo
 
 ## Support and Further Information
 
-Ask questions and file tickets on <a href="https://www.predix.io/community" target="_blank">https://www.predix.io/community</a>.
+Ask questions or report a bug by creating an issue in this Github repository.
 
-This application also serves as the UI for the Predix RMD Reference App.  For more information:
-- [Predix RMD Reference App Dev Guide](https://www.predix.io/resources/tutorials/journey.html#1610)
-- [predix-rmd-ref-app Github repo](https://github.com/predixdev/predix-rmd-ref-app)
-
-# Copyright
-Copyright &copy; 2015, 2016, 2017, 2018 GE Global Research. All rights reserved.
-
-The copyright to the computer software herein is the property of
-GE Global Research. The software may be used and/or copied only
-with the written permission of GE Global Research or in accordance
-with the terms and conditions stipulated in the agreement/contract
-under which the software has been supplied.
 
 [![Analytics](https://ga-beacon.appspot.com/UA-82773213-1/predix-webapp-starter/readme?pixel)](https://github.com/PredixDev)
 
