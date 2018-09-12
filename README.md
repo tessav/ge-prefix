@@ -38,7 +38,7 @@ git clone https://github.com/tessav/ge-prefix.git
 cd ge-prefix
 ```
 
-### Install tools
+#### Install tools
 If you don't have them already, you'll need node, bower and gulp to be installed globally on your machine.  
 
 1. Install [node](https://nodejs.org/en/download/).  This includes npm - the node package manager.  
@@ -51,14 +51,14 @@ Change directory into the new project you just cloned, then install dependencies
 npm install
 bower install
 ```
-## Running the app locally
+### Running the app locally
 The default gulp task will start a local web server.  Just run this command:
 ```
 gulp
 ```
 Browse to http://localhost:5000.
 
-## Setup Database
+### Setup Database
 Create a new database and create new tables using the following SQL:<br>
 ```
 CREATE TABLE service_request (
@@ -79,7 +79,7 @@ CREATE TABLE error_log (
 Edit the dbconfig in `app.js` and `analytics-service.js` to your database credentials.
 
 
-## Running in Predix Cloud
+### Running in Predix Cloud
 
 
 ## Push to the Cloud
