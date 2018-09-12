@@ -200,6 +200,7 @@
     <div class="u-p">
       <span class="heading--subsection">ASSOCIATED SYMPTOM WORD CLOUD</span>
     </div>
+    <img id="wordcloudImg" />
   </div>
 
 </div>
@@ -222,6 +223,7 @@ Polymer({
 
     this.$.aboutContentAjaxEl.addEventListener('response', (evt) => {
       document.getElementById('symptomtable').tableData = [];
+      document.getElementById('topTopic').value = '';
 
       let jsonData = JSON.parse(evt.detail.response);
       document.getElementById('rescodeDropdown').items = jsonData.uniqueResCodes.map((item, _) => {
@@ -281,6 +283,7 @@ Polymer({
     this.$.wordcloudAjax.body = {'rescode': query };
     this.$.wordcloudAjax.addEventListener('response', (evt) => {
       console.log(evt.detail.response)
+      document.getElementById('wordcloudImg').src = "data:image/jpeg;base64," + evt.detail.response.wordcloud_img
     })
 
     if (query != '') {

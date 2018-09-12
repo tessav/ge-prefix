@@ -155,7 +155,6 @@ const runWordcloud = async function(req, res) {
     } else if (response.statusCode == 200 || response.statusCode == 204) {
       console.log('Response from analytics:', body);
       res.send(JSON.parse(body.result))
-      // save word cloud base64
     } else {
       console.error('ERROR executing analytics: ' + JSON.stringify(response));
       // res.sendStatus(response.statusCode);
