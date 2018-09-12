@@ -371,10 +371,11 @@ app.post('/loadsr', async function(req, res) {
           })
           .on('end', async function() {
             const loadSR = await client.query('INSERT INTO service_request(sr_id, symptom, final_rescode, req_status, req_timestamp) SELECT * FROM UNNEST ($1::text[], $2::text[], $3::text[], $4::text[], $5::timestamp[]);', rowStore)
-            await client.end()
-            res.send('done')
           });
     }
+  }).on('end', async function() {
+    await client.end();
+    res.send('done');
   });
 })
 
@@ -401,10 +402,12 @@ app.post('/loadel', async function(req, res) {
           })
           .on('end', async function() {
             const errors = await client.query(`INSERT INTO error_log(error_code, error_timestamp, sr_id) SELECT * FROM UNNEST ($1::text[], $2::timestamp[], $3::text[]);`, rowStore)
-            await client.end()
-            res.send('done')
+            console.log(errors)
           });
     }
+  }).on('end', async function() {
+    await client.end()
+    res.send('done')
   });
 })
 

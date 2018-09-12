@@ -1,8 +1,9 @@
 ---
 applications:
   - name: Predix-HelloWorld-WebApp-prefix
-    memory: 5G
-    timeout: 600
+    memory: 10G
+    timeout: 180
+    disk: 10G
     buildpack: nodejs_buildpack
     command: node server/app.js
     #path: build/es5-basic

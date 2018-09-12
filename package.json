@@ -10,7 +10,7 @@
     "email": "predix.adoption@ge.com"
   },
   "scripts": {
-    "start": "node server/app.js",
+    "start": "node server/app.js --max_old_space_size=2000 ",
     "test": "node_modules/mocha/bin/mocha test/server"
   },
   "keywords": [
