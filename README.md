@@ -58,6 +58,27 @@ gulp
 ```
 Browse to http://localhost:5000.
 
+## Setup Database
+Create a new database and create new tables using the following SQL:<br>
+```
+CREATE TABLE service_request (
+  sr_id VARCHAR(32) PRIMARY KEY NOT NULL,
+  symptom TEXT,
+  final_rescode VARCHAR(100),
+  predicted_rescodes JSON,
+  req_status VARCHAR(48),
+  req_timestamp TIMESTAMP
+);
+CREATE TABLE error_log (
+  id SERIAL PRIMARY KEY NOT NULL,
+  error_code TEXT,
+  error_timestamp TIMESTAMP,
+  sr_id VARCHAR(32) NOT NULL
+);
+```
+Edit the dbconfig in `app.js` and `analytics-service.js` to your database credentials.
+
+
 ## Running in Predix Cloud
 
 
