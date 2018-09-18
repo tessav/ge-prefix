@@ -48,21 +48,7 @@ if (node_env === 'development') {
 
 const { Pool, Client } = require('pg')
 
-// const dbconfig = {
-//   user: 'ud9umpepw3owqbwv',
-//   host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
-//   database: 'postgres',
-//   password: '3le6mxqkjvpaj12yzl6wnen5f',
-//   port: 5432,
-// }
-// FOR DEVELOPMENT
-const dbconfig = {
-  user: 'postgres',
-  host: 'localhost',
-  database: 'postgres',
-  password: '',
-  port: 5432,
-}
+const dbconfig = require('./dbConfig.json')[node_env];
 
 // Session Storage Configuration:
 // *** Use this in-memory session store for development only. Use redis for prod. **
@@ -308,6 +294,9 @@ app.get('/resolutions', async function(req, res)  {
   let avgFrequency
   let errorCodes
   let srHeatmap
+  let topics
+  let relatedRescodes
+
   await client.connect()
   if (rescode) {
     uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
@@ -315,12 +304,31 @@ app.get('/resolutions', async function(req, res)  {
     avgFrequency = await client.query(`SELECT DATE_PART('day', MAX(req_timestamp) - MIN(req_timestamp)) / COUNT(*) as freq from SERVICE_REQUEST WHERE final_rescode='${rescode}';`)
     errorCodes = await client.query(`SELECT el.error_code as error_code, COUNT(*) as counter FROM ERROR_LOG el, SERVICE_REQUEST sr WHERE sr.final_rescode='${rescode}' AND el.sr_id=sr.sr_id GROUP BY el.error_code ORDER BY counter DESC;`)
     srHeatmap = await client.query(`SELECT to_char(req_timestamp, 'YYYY') as year, to_char(req_timestamp, 'Mon') as month, COUNT(*) FROM service_request WHERE final_rescode='${rescode}' GROUP BY year, month ORDER BY year,month;`)
+    let topicsRaw = await client.query(`SELECT top_topics from rescode_store WHERE rescode='${rescode}';`)
+    let relatedRescodesRaw = await client.query(`SELECT related_rescodes from rescode_store WHERE rescode='${rescode}';`)
+    topics = topicsRaw.rows[0]['top_topics'].split(' ').map((item, _) => {
+      return {
+        'rank': _+1,
+        'topic': item
+      };
+    })
+    let relatedRescodesObj = JSON.parse(relatedRescodesRaw.rows[0]['related_rescodes'])
+    relatedRescodes = relatedRescodesObj['rescode'].map((rescode,_) => {
+      const similarity = (parseFloat(relatedRescodesObj['similarity'][_]) * 100).toFixed(1)
+      return {
+        'rank': _+1,
+        'rescode': rescode,
+        'similarity': `${similarity}%`
+      };
+    })
   } else {
     uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
     lastResolution = await client.query(`SELECT to_char(MAX(req_timestamp), 'DD-MM-YYYY') as last_resolution from SERVICE_REQUEST;`)
     avgFrequency = await client.query(`SELECT DATE_PART('day', MAX(req_timestamp) - MIN(req_timestamp)) / COUNT(*) as freq from SERVICE_REQUEST;`)
     errorCodes = await client.query(`SELECT el.error_code as error_code, COUNT(*) as counter FROM ERROR_LOG el, SERVICE_REQUEST sr WHERE el.sr_id=sr.sr_id GROUP BY el.error_code ORDER BY counter DESC;`)
     srHeatmap = await client.query(`SELECT to_char(req_timestamp, 'YYYY') as year, to_char(req_timestamp, 'Mon') as month, COUNT(*) FROM service_request GROUP BY year, month ORDER BY year,month;`)
+    topics = []
+    relatedRescodes = []
   }
 
   await client.end()
@@ -329,7 +337,9 @@ app.get('/resolutions', async function(req, res)  {
       'lastResolution': lastResolution.rows[0].last_resolution,
       'avgFrequency': avgFrequency.rows[0].freq,
       'errorCodes': errorCodes.rows,
-      'srHeatmap': srHeatmap.rows
+      'srHeatmap': srHeatmap.rows,
+      'topics': topics,
+      'relatedRescodes': relatedRescodes
   });
 })
 
@@ -411,19 +421,44 @@ app.post('/loadel', async function(req, res) {
   });
 })
 
-app.post('/loadrc', async function(req, res) {
+// app.post('/loadrc', async function(req, res) {
+//   const client = new Client(dbconfig)
+//   await client.connect()
+//   const uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
+//   let sqlStr = 'INSERT INTO rescode_store(rescode) VALUES'
+//   for (let rescode of uniqueResCodes.rows) {
+//     sqlStr += ` ('${rescode.counter}'),`
+//   }
+//   sqlStr = sqlStr.substring(0, sqlStr.length-1) + ';'
+//   console.log(sqlStr)
+//   const pgres = await client.query(sqlStr)
+//   await client.end()
+//   res.send(uniqueResCodes)
+// })
+
+app.post('/load-analytics', async function(req, res) {
+  // read csv from jupyter notebook analytics
   const client = new Client(dbconfig)
   await client.connect()
-  const uniqueResCodes = await client.query(`SELECT final_rescode as counter FROM SERVICE_REQUEST WHERE final_rescode IS NOT NULL GROUP BY final_rescode ORDER BY counter DESC;`)
-  let sqlStr = 'INSERT INTO rescode_store(rescode) VALUES'
-  for (let rescode of uniqueResCodes.rows) {
-    sqlStr += ` ('${rescode.counter}'),`
-  }
-  sqlStr = sqlStr.substring(0, sqlStr.length-1) + ';'
-  console.log(sqlStr)
-  const pgres = await client.query(sqlStr)
-  await client.end()
-  res.send(uniqueResCodes)
+  const dirPath = 'server/sample-data/rescodes/'
+  fs.readdir(dirPath, async function(err, items) {
+    for (var i=0; i<items.length; i++) { // for each file to upload
+        let rowStore = [[],[],[]]
+        fs.createReadStream(dirPath + items[i])
+          .pipe(parse({delimiter: ','}))
+          .on('data', async function(csvrow) {
+            rowStore[0].push(csvrow[0]);
+            rowStore[1].push(csvrow[1]);
+            rowStore[2].push(csvrow[2]);
+          })
+          .on('end', async function() {
+            const loadSR = await client.query('INSERT INTO rescode_store(rescode, top_topics, related_rescodes) SELECT * FROM UNNEST ($1::text[], $2::text[], $3::text[]);', rowStore)
+          });
+    }
+  }).on('end', async function() {
+    await client.end();
+    res.send('done');
+  });
 })
 
 

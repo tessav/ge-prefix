@@ -1,0 +1,16 @@
+{
+  "cloud": {
+    "user": "ud9umpepw3owqbwv",
+    "host": "db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com",
+    "database": "postgres",
+    "password": "3le6mxqkjvpaj12yzl6wnen5f",
+    "port": 5432
+  },
+  "development": {
+    "user": "postgres",
+    "host": "localhost",
+    "database": "postgres",
+    "password": "",
+    "port": 5432
+  }
+}

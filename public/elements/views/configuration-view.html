@@ -84,7 +84,7 @@ Polymer({
   },
   _runResolution: function() {
     console.log('running resolution...')
-    this.$.runResolutionAjax.url = '/api/run-resolution'
+    this.$.runResolutionAjax.url = '/load-analytics'
     this.$.runResolutionAjax.body = {'run': 'resolution'}
     this.$.runResolutionAjax.addEventListener('response', function(evt) {
       console.log(evt.detail.response);

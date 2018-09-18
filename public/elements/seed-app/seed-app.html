@@ -174,7 +174,7 @@
       ready: function(){
         if (!this.$.starterAppRoute.navRoute) {
           // set default route
-          this.$.starterAppRoute.navRoute = ['datasource'];
+          //this.$.starterAppRoute.navRoute = ['dashboard'];
         }
         // console.log('ready. route: ', this.$.starterAppRoute.navRoute);
         this.$.configAjaxEl.addEventListener('response', function(evt) {
@@ -187,7 +187,7 @@
 
       getHref: function(navRoute) {
         console.log(navRoute);
-        var navRoute = this.$.starterAppRoute.navRoute || ['assets'];
+        var navRoute = this.$.starterAppRoute.navRoute || ['dashboard'];
         return '/elements/views/' + navRoute[0] + '-view.html';
       },
 

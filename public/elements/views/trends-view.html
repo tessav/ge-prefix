@@ -86,7 +86,7 @@
   <px-key-value-pair
   label="TOP TOPIC"
   id='topTopic'
-  value=""
+  value="NIL"
   uom=""
   size="gamma">
 </px-key-value-pair>
@@ -124,32 +124,8 @@
   </div>
   <div style="padding: 10px;">
     <div style="padding: 10px 10px;">
+      <px-data-table id='relatedRescodeTable' page-size="5"></px-data-table>
 
-      <table class="table">
-        <tbody>
-          <tr>
-            <th>Rank</th>
-            <th>Resolution Code</th>
-            <th>Similarity</th>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>No_Structural_Problem_Found</td>
-            <td>60%</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>No_Structural_Problem_Found</td>
-            <td>60%</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>No_Structural_Problem_Found</td>
-            <td>60%</td>
-          </tr>
-
-        </tbody>
-      </table>
     </div>
   </div>
 </div>
@@ -223,9 +199,11 @@ Polymer({
 
     this.$.aboutContentAjaxEl.addEventListener('response', (evt) => {
       document.getElementById('symptomtable').tableData = [];
-      document.getElementById('topTopic').value = '';
+      document.getElementById('topTopic').value = 'NIL';
+      document.getElementById('wordcloudImg').src = '';
 
       let jsonData = JSON.parse(evt.detail.response);
+      console.log(jsonData)
       document.getElementById('rescodeDropdown').items = jsonData.uniqueResCodes.map((item, _) => {
         return {
           'key': item['counter'],
@@ -267,17 +245,15 @@ Polymer({
       }
       document.getElementById('heatmap').scaleMax = topCount;
       document.getElementById('heatmap').heatmapData = heatmapData;
+
+      // topics
+      document.getElementById('symptomtable').tableData = jsonData['topics'];
+      document.getElementById('topTopic').value = jsonData['topics'][0] ? jsonData['topics'][0]['topic'] : 'NIL';
+      document.getElementById('relatedRescodeTable').tableData = jsonData['relatedRescodes'];
+
     });
 
     this.$.aboutContentAjaxEl.generateRequest();
-
-    this.$.topicDetectorAjax.url = '/api/topicdetector';
-    this.$.topicDetectorAjax.body = {'rescode': query };
-    this.$.topicDetectorAjax.addEventListener('response', (evt) => {
-      console.log(evt.detail.response)
-      document.getElementById('symptomtable').tableData = evt.detail.response;
-      document.getElementById('topTopic').value = evt.detail.response ? evt.detail.response[0].topic : '';
-    })
 
     this.$.wordcloudAjax.url = '/api/wordcloud';
     this.$.wordcloudAjax.body = {'rescode': query };
@@ -287,7 +263,6 @@ Polymer({
     })
 
     if (query != '') {
-      this.$.topicDetectorAjax.generateRequest();
       this.$.wordcloudAjax.generateRequest();
     }
 

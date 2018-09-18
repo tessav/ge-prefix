@@ -6,22 +6,8 @@ const config = require('../predix-config');
 
 const { Pool, Client } = require('pg')
 
-// const dbconfig = {
-//   user: 'ud9umpepw3owqbwv',
-//   host: 'db-2b43164b-fa6b-4720-84d1-557fb5a4ab7f.c7uxaqxgfov3.us-west-2.rds.amazonaws.com',
-//   database: 'postgres',
-//   password: '3le6mxqkjvpaj12yzl6wnen5f',
-//   port: 5432,
-// }
-
-// FOR DEVELOPMENT
-const dbconfig = {
-  user: 'postgres',
-  host: 'localhost',
-  database: 'postgres',
-  password: '',
-  port: 5432,
-}
+const node_env = process.env.node_env || 'development';
+const dbconfig = require('../dbConfig.json')[node_env];
 
 const executeAnalytic = function(req, res) {
   console.log('executing...');
@@ -153,7 +139,7 @@ const runWordcloud = async function(req, res) {
       console.error('Error from analytics:', body.errorEvent[0]);
       res.status(500).send(body.errorEvent[0]);
     } else if (response.statusCode == 200 || response.statusCode == 204) {
-      console.log('Response from analytics:', body);
+      //console.log('Response from analytics:', body);
       res.send(JSON.parse(body.result))
     } else {
       console.error('ERROR executing analytics: ' + JSON.stringify(response));
