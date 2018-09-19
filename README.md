@@ -75,6 +75,12 @@ CREATE TABLE error_log (
   error_timestamp TIMESTAMP,
   sr_id VARCHAR(32) NOT NULL
 );
+CREATE TABLE rescode_store (
+  rescode VARCHAR(100) PRIMARY KEY NOT NULL,
+  top_topics TEXT,
+  related_rescodes TEXT,
+  wordcloud TEXT
+);
 ```
 Edit the dbconfig in `app.js` and `analytics-service.js` to your database credentials.
 
