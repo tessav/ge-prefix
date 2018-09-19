@@ -17,7 +17,7 @@ const executeAnalytic = function(req, res) {
 
   var options = {
     method: 'POST',
-    url: config.analyticsCatalogUri + '/api/v1/catalog/analytics/ecf969bb-a6e9-466c-ae24-679384ba45d1/execution',
+    url: config.analyticsCatalogUri + '/api/v1/catalog/analytics/c6dd7695-65cd-4aed-9302-ed8852a031f0/execution',
     headers: {
         'cache-control': 'no-cache',
         'Authorization' : req.headers['Authorization'],

@@ -222,12 +222,21 @@ app.get('/config', function(req, res) {
 
 app.post('/runmodel', async function(req, res) {
   res.send('hello');
-  const error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
-    return {
-      'error_code': log.split(',')[0].trim(),
-      'error_timestamp': log.split(',')[1].trim()
-    };
-  });
+  let error_list
+  console.log(req.body.error_logs.split(/\r?\n/).length);
+  if (req.body.error_logs == '') {
+    error_list = []
+  } else {
+    error_list = req.body.error_logs.split(/\r?\n/).map((log) => {
+      return {
+        'error_code': log.split(',')[0].trim(),
+        'error_timestamp': log.split(',')[1].trim()
+      };
+    });
+  }
+
+  console.log(error_list);
+
   const req_timestamp = moment().format()
   const client = new Client(dbconfig)
   await client.connect()

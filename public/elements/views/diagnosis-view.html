@@ -96,20 +96,7 @@
         </div>
         <div style="padding: 10px 20px;">
 
-          <table class="table">
-            <tbody>
-              <tr>
-                <th>Rank</th>
-                <th>Resolution Code</th>
-                <th>Confidence</th>
-              </tr>
-              <tr>
-                <td>1</td>
-                <td id="predictedRescode"></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
+          <px-data-table id='predictedRescode' hide-pagination-control='true'></px-data-table>
         </div>
       </div>
 
@@ -211,10 +198,22 @@ Polymer({
         }
 
         if (selected['predicted_rescodes']) {
-          const predictedRescode = selected['predicted_rescodes']['predicted'];
-          document.getElementById('predictedRescode').innerHTML = predictedRescode;//'<a href="/#/trends/' + encodeURI(predictedRescode) + `">${predictedRescode}</a>`;
+          console.log(selected['predicted_rescodes']);
+          const predictedRescodes = selected['predicted_rescodes']['predictions'].map((item, _) => {
+            let proba = (parseFloat(item['proba']) * 100).toFixed(1)
+            return {
+              'rank': _+1,
+              'resolution code': item['label'],
+              'prob': `${proba}%`
+            }
+          });
+          document.getElementById('predictedRescode').tableData = predictedRescodes;//'<a href="/#/trends/' + encodeURI(predictedRescode) + `">${predictedRescode}</a>`;
         } else {
-          document.getElementById('predictedRescode').innerHTML = 'No prediction yet';
+          document.getElementById('predictedRescode').tableData = [{
+            'rank': 1,
+            'resolution code': 'No prediction yet',
+            'prob': ''
+          }];
         }
         (selected['predicted_rescodes']) ? selected['predicted_rescodes']['predicted'] : 'No prediction yet.';
         document.getElementById('req_status').innerHTML = selected['req_status'];

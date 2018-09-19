@@ -76,7 +76,7 @@
         this.$.aboutContentAjaxEl.body = {
           "sr_id": document.getElementById('sr_id').value,
           "symptom": document.getElementById('symptom').value,
-          "error_logs": document.getElementById('error_code').value
+          "error_logs": document.getElementById('error_code').value || ''
         };
         this.$.aboutContentAjaxEl.addEventListener('response', function(evt) {
           console.log(evt);
