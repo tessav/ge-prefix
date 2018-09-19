@@ -7,8 +7,8 @@ The Prefix Diagnostic Tool ("Prefix") is a data analytics tool that aims to augm
 3. Develop an intuition for troubleshooting by aggregating and visualizing data related to resolution codes
 
 ## Tech Stack
-<i>Simplified Proposed Architecture</i>
-![proposed-architecture](https://i.imgur.com/01DxkKH.png)
+<i>Current Architecture</i>
+![architecture](https://i.imgur.com/niZ26PN.png)
 1. The frontend utilizes components from [Predix UI Components](https://www.predix-ui.com), which are built on Polymer.
 2. The backend is implemented with a NodeJS/Express web server which integrates with Predix services like:
 - User account & authentication (UAA)
