@@ -8,6 +8,7 @@ The Prefix Diagnostic Tool ("Prefix") is a data analytics tool that aims to augm
 
 ## Tech Stack
 This is built for a General Electric hackathon.
+<br>
 <i>Current Architecture</i>
 ![Imgur](https://i.imgur.com/Xwhw10K.png)
 1. The frontend utilizes components from [Predix UI Components](https://www.predix-ui.com), which are built on Polymer.
